@@ -1,0 +1,70 @@
+﻿@model AirSicknessBags.Models.Bagsmvc
+
+@{
+    ViewData["Title"] = "Bag Manipulation";
+    ViewData["Controller"] = "Bags";
+}
+
+<h2>@ViewBag.Operation Bag</h2>
+<div class="border container">
+    <form asp-controller="Bags" asp-action="Edit" method="post">
+        @*@using (Html.BeginForm("Edit", "Bags", FormMethod.Post))*@
+
+        <h1>ID: @Model.Id</h1>
+        <div>
+            @if (ViewBag.Copy == false)
+            {
+                <input type="hidden" asp-for="@Model.Id" />
+            }
+            <span asp-validation-for="@Model.Airline" class="text-danger"></span>
+            <label asp-for="@Model.Airline"></label>
+            <input asp-for="@Model.Airline" />
+            <label asp-for="@Model.FrontFileName"></label>
+            <input type="file" onchange="retrieveImageName('FrontFileName', this.value)" />
+            <input asp-for="@Model.FrontFileName" />
+            <label asp-for="@Model.BackFileName"></label>
+            <input type="file" onchange="retrieveImageName('BackFileName', this.value)" />
+            <input asp-for="@Model.BackFileName" />
+            <label asp-for="@Model.BottomFileName"></label>
+            <input type="file" onchange="retrieveImageName('BottomFileName', this.value)" />
+            <input asp-for="@Model.BottomFileName" />
+            <label asp-for="@Model.Year"></label>
+            <input asp-for="@Model.Year" />
+            <label asp-for="@Model.TextColor"></label>
+            <input asp-for="@Model.TextColor" />
+            <label asp-for="@Model.BackgroundColor"></label>
+            <input asp-for="@Model.BackgroundColor" />
+            <label asp-for="@Model.BagType"></label>
+            <input asp-for="@Model.BagType" />
+            <label asp-for="@Model.ObtainedFrom"></label>
+            <input asp-for="@Model.ObtainedFrom" />
+            <label asp-for="@Model.NumberOfSwaps"></label>
+            <input asp-for="@Model.NumberOfSwaps" />
+            <label asp-for="@Model.DateSwapAdded"></label>
+            <input asp-for="@Model.DateSwapAdded" asp-format="{0:yyyy-MM-dd}" />
+            @*WORKS <input asp-for="@Model.DateSwapAdded" asp-format="{0:yyyy-MM-dd}" type="date" />*@
+            <label asp-for="@Model.Lost"></label>
+            <input asp-for="@Model.Lost" />
+            <label asp-for="@Model.Detail"></label>
+            <textarea rows="5" cols="80" asp-for="@Model.Detail"></textarea>
+            <br>
+            <input class="btn btn-info" type="submit" />
+            <a class="btn btn-info" asp-controller="Bags" asp-action="Index">Cancel</a>
+
+            @await Html.PartialAsync("~/Views/Shared/_AreYouSurePartial.cshtml", Model, ViewData["Controller"] as ViewDataDictionary)
+
+        </div>
+    </form>
+</div>
+
+@section scripts {
+    <script type="text/javascript">
+        function retrieveImageName(tag, val) {
+            const filestring = val.split('\\');
+            const fnelements = filestring[filestring.length - 1].split('.');
+            document.getElementById(tag).value = fnelements[0];
+        }
+    </script>
+
+    <partial name="_ValidationScriptsPartial" />
+}
