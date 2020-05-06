@@ -7,7 +7,9 @@ using AirSicknessBags.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json;
+using static AirSicknessBags.Models.BagContext;
 
 namespace AirSicknessBags.Controllers
 {
@@ -22,18 +24,38 @@ namespace AirSicknessBags.Controllers
     public class BagsController : Controller
     {
         private readonly BagContext _db;
+        private IMemoryCache _cache;
         [BindProperty]
+        public BagViewModel bvm { get; set; }
         public Bagsmvc Bags { get; set; }
+        public Bagtypes TypesARooney { get; set; }
 
         public BagsController(BagContext db)
         {
             _db = db;
+//            _cache = memoryCache;
+        }
+
+        //public static class CacheKeys
+        //{
+        //    public static List<Bagtypes> bagtypes { get { return _db.Types; } }
+        //}
+
+        // List of bagtypes.  Only want to get these once
+        public static List<Bagtypes> bagtypes  {get; set;} = null;
+
+        //        private static async DbSet<Bagtypes> GetBagtypes()
+//        public static async Task<IActionResult> GetBagtypes(BagContext _db)
+        public DbSet<Bagtypes> GetBagtypes()
+        {
+            var bagtypes = _db.Types;
+            return (bagtypes);
         }
 
         #region API Calls
         // GET: Bags
 #pragma warning disable CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
-//        public async Task<IActionResult> GetBags(string? SearchString)
+        //        public async Task<IActionResult> GetBags(string? SearchString)
         public async Task<IActionResult> GetBags(IFormCollection? collection)
 //        public async Task<IActionResult> GetBags(HttpRequest collection)
 #pragma warning restore CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
@@ -178,7 +200,10 @@ namespace AirSicknessBags.Controllers
         public async Task<IActionResult> Edit(int? id, bool? copy)
         {
             Bagsmvc bag = new Bagsmvc();
+            BagViewModel bvm = new BagViewModel();
             ViewBag.Operation = "Edit This";
+
+            // First set up the bagtype dropdown
 
             // When id is not null, we are editing or copying.  Otherwise, we're creating 
             // EDIT a bag
@@ -205,20 +230,29 @@ namespace AirSicknessBags.Controllers
                 await _db.SaveChangesAsync(); ;
             }
 
-            return View(bag);
+            bvm.Bag = bag;
+            //            bvm.TypeOfBag = _db.Types;
+            if (bagtypes == null)
+            {
+                bagtypes = await _db.Types.ToListAsync();
+            }
+            bvm.TypeOfBag = bagtypes;
+
+
+            return View(bvm);
         }
 
         // POST: Bags/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-//        public ActionResult Edit(int id, IFormCollection collection)
-        public ActionResult Edit(Bagsmvc bag, IFormCollection collection)
+        public ActionResult Edit(BagViewModel bvm, IFormCollection collection)
+//        public ActionResult Edit(Bagsmvc bag, IFormCollection collection)
         {
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _db.Bags.Update(bag);
+                    _db.Bags.Update(bvm.Bag);
                     _db.SaveChanges();
 
                     return RedirectToAction(nameof(Index));
@@ -229,7 +263,7 @@ namespace AirSicknessBags.Controllers
                 }
             }
 
-            return View(bag);
+            return View(bvm.Bag);
         }
 
         // GET: Bags/Delete/5

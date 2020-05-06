@@ -1,0 +1,207 @@
+﻿@*@model IEnumerable<AirSicknessBags.Models.Peoplemvc>*@
+@model BagContext.PeopleViewModel
+
+@{
+    ViewData["Title"] = "People of Air Sickness";
+}
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+
+<h5>Collectors, Donated Collections, Donated a bag or several, Swappers, Sellers, Received a Starter Kit </h5>
+<div class="border container">
+    <form asp-controller="People" asp-action="Index" method="post">
+
+
+        <div class="container border">
+            <div class="form-group row">
+                <div class="col-2">Find Person</div>
+                <div class="col-3">
+                    <input type="text" id="PersonName" name="PersonName" />
+                </div>
+                <div class="col-3">Person Details Contain</div>
+                <div class="col-3">
+                    <input type="text" id="Detail" name="Detail" />
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <div class="col-2">
+                    <label for="Country">Country:</label>
+                </div>
+                <div class="col-2">
+                    <select id="Country" name="Country">
+                        <option value="">Any</option>
+                        @foreach (var ctry in Model.Countries)
+                        {
+                            <option value="@ctry.Iso">@ctry.Name</option>
+                        }
+                    </select>
+                </div>
+
+
+            </div>
+
+            <label for="AllPeople" title="Choosing this overrides all other selections">See Everyone?</label>
+            <input type="checkbox" id="AllPeople" name="AllPeople">
+            |
+            <label for="HasWebsite">Has Website?</label>
+            <input type="checkbox" id="HasWebsite" name="HasWebsite">
+            |
+            <label for="Collector" title="See a list of Air Sickness Bag Collectors">Collector</label>
+            <input type="checkbox" id="Collector" name="Collector">
+            |
+            <label for="Donor" title="These people have donated a bag, a few bags or an entire collection!">Donor</label>
+            <input type="checkbox" id="Donor" name="Donor">
+            |
+            <label for="Swapper" title="I have exchanged bags with these people">Swapper</label>
+            <input type="checkbox" id="Swapper" name="Swapper">
+            |
+            <label for="Seller" title="Here's a list of people that I bought bags from">Seller</label>
+            <input type="checkbox" id="Seller" name="Seller">
+            |
+            <label for="StarterKit" title="I have sent a Starter Kit to these people">Starter Kit</label>
+            <input type="checkbox" id="StarterKit" name="StarterKit">
+
+            <br>
+            <input class="btn btn-info" type="submit" value="Find Person" />
+            <a class="btn btn-info" asp-controller="People" asp-action="Edit">Create Person</a>
+            <hr />
+        </div>
+
+
+
+
+
+
+
+    </form>
+</div>
+
+@if (Model.People != null)
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.People[0].FirstName) @Html.DisplayNameFor(model => model.People[0].MiddleName)
+                    @Html.DisplayNameFor(model => model.People[0].LastName)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.People[0].PrimarySiteName)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.People[0].SecondarySiteName)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.People[0].PrimarySite)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.People[0].SecondarySite)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.People[0].Country)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.People[0].IsoCountry)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.People[0].PrimaryEmail)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.People[0].SecondaryEmail)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.People[0].TertiaryEmail)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.People[0].Collector)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.People[0].Donor)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.People[0].Swapper)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.People[0].Seller)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.People[0].StarterKit)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.People[0].Comments)
+                </th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.People)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.FirstName)  @Html.DisplayFor(modelItem => item.MiddleName)
+                        @Html.DisplayFor(modelItem => item.LastName)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.PrimarySiteName)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.SecondarySiteName)
+                    </td>
+                    <td>
+                        @if (item.PrimarySiteName != null && item.PrimarySiteName != "")
+                        {
+                            @*<a href="@("http://" + @item.PrimarySite)" target="_blank">@("http://" + @item.PrimarySite)</a>*@
+                            <a href="@(@item.PrimarySite)" target="_blank">@(@item.PrimarySite)</a>
+                        }
+                    </td>
+                    <td>
+                        @if (item.SecondarySite != null && item.SecondarySiteName != "")
+                        {
+                            <a href="@(@item.SecondarySite)" target="_blank">@(@item.SecondarySite)</a>
+                        }
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Country)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.IsoCountry)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.PrimaryEmail)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.SecondaryEmail)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.TertiaryEmail)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Collector)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Donor)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Swapper)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Seller)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.StarterKit)
+                    </td>
+                    <td>
+                        @Html.Raw(item.Comments)
+                    </td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.PersonNumber">Edit</a> |
+                        <a asp-action="Details" asp-route-id="@item.PersonNumber">Details</a> |
+                        <a asp-action="Delete" asp-route-id="@item.PersonNumber">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

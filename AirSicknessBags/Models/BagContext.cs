@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Extensions.Configuration;
@@ -21,9 +22,21 @@ namespace AirSicknessBags.Models
         public virtual DbSet<Bagsmvc> Bags { get; set; }
         public virtual DbSet<Linksmvccore> Links { get; set; }
         public virtual DbSet<Peoplemvc> People { get; set; }
-        //public virtual DbSet<Bagsmvc> Bagsmvc { get; set; }
+        public virtual DbSet<Bagtypes> Types { get; set; }
+        public virtual DbSet<Country> Countries { get; set; }
         //public virtual DbSet<Linksmvccore> Linksmvccore { get; set; }
-        //public virtual DbSet<Peoplemvc> Peoplemvc { get; set; }
+
+        public class BagViewModel
+        {
+            public Bagsmvc Bag { get; set; }
+            public List<Bagtypes> TypeOfBag { get; set; }
+        }
+
+        public class PeopleViewModel
+        {
+            public List<Peoplemvc> People{ get; set; }
+            public List<Country> Countries { get; set; }
+        }
 
         //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         //{

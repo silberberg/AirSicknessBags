@@ -57,7 +57,7 @@ namespace AirSicknessBags
             {
                 endpoints.MapControllerRoute(
                     name: "default",
-                    pattern: "{controller=Bags}/{action=Index}/{id?}");
+                    pattern: "{controller=Home}/{action=Index}/{id?}");
             });
         }
     }

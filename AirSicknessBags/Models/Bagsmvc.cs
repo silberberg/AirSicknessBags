@@ -6,10 +6,10 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AirSicknessBags.Models
 {
-    public class BagList
-    {
-        public List<Bagsmvc> baglist { get; set; }
-    }
+    //public class BagList
+    //{
+    //    public List<Bagsmvc> baglist { get; set; }
+    //}
 
     [Table("bagsmvc")]
     public partial class Bagsmvc

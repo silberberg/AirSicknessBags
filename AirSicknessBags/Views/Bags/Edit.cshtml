@@ -1,8 +1,10 @@
-﻿@model AirSicknessBags.Models.Bagsmvc
+﻿@*@model AirSicknessBags.Models.Bagsmvc*@
+@model BagContext.BagViewModel
 
 @{
     ViewData["Title"] = "Bag Manipulation";
     ViewData["Controller"] = "Bags";
+    string BagTypeString = "";
 }
 
 <h2>@ViewBag.Operation Bag</h2>
@@ -10,48 +12,62 @@
     <form asp-controller="Bags" asp-action="Edit" method="post">
         @*@using (Html.BeginForm("Edit", "Bags", FormMethod.Post))*@
 
-        <h1>ID: @Model.Id</h1>
+        <h1>ID: @Model.Bag.Id</h1>
         <div>
-            @if (ViewBag.Copy == false)
+            @if (ViewBag.Operation != "Recently Copied")
             {
-                <input type="hidden" asp-for="@Model.Id" />
+                <input type="hidden" asp-for="@Model.Bag.Id" />
             }
-            <span asp-validation-for="@Model.Airline" class="text-danger"></span>
-            <label asp-for="@Model.Airline"></label>
-            <input asp-for="@Model.Airline" />
-            <label asp-for="@Model.FrontFileName"></label>
+            <span asp-validation-for="@Model.Bag.Airline" class="text-danger"></span>
+            <label asp-for="@Model.Bag.Airline"></label>
+            <input asp-for="@Model.Bag.Airline" />
+            <label asp-for="@Model.Bag.FrontFileName"></label>
             <input type="file" onchange="retrieveImageName('FrontFileName', this.value)" />
-            <input asp-for="@Model.FrontFileName" />
-            <label asp-for="@Model.BackFileName"></label>
+            <input asp-for="@Model.Bag.FrontFileName" />
+            <label asp-for="@Model.Bag.BackFileName"></label>
             <input type="file" onchange="retrieveImageName('BackFileName', this.value)" />
-            <input asp-for="@Model.BackFileName" />
-            <label asp-for="@Model.BottomFileName"></label>
+            <input asp-for="@Model.Bag.BackFileName" />
+            <label asp-for="@Model.Bag.BottomFileName"></label>
             <input type="file" onchange="retrieveImageName('BottomFileName', this.value)" />
-            <input asp-for="@Model.BottomFileName" />
-            <label asp-for="@Model.Year"></label>
-            <input asp-for="@Model.Year" />
-            <label asp-for="@Model.TextColor"></label>
-            <input asp-for="@Model.TextColor" />
-            <label asp-for="@Model.BackgroundColor"></label>
-            <input asp-for="@Model.BackgroundColor" />
-            <label asp-for="@Model.BagType"></label>
-            <input asp-for="@Model.BagType" />
-            <label asp-for="@Model.ObtainedFrom"></label>
-            <input asp-for="@Model.ObtainedFrom" />
-            <label asp-for="@Model.NumberOfSwaps"></label>
-            <input asp-for="@Model.NumberOfSwaps" />
-            <label asp-for="@Model.DateSwapAdded"></label>
-            <input asp-for="@Model.DateSwapAdded" asp-format="{0:yyyy-MM-dd}" />
-            @*WORKS <input asp-for="@Model.DateSwapAdded" asp-format="{0:yyyy-MM-dd}" type="date" />*@
-            <label asp-for="@Model.Lost"></label>
-            <input asp-for="@Model.Lost" />
-            <label asp-for="@Model.Detail"></label>
-            <textarea rows="5" cols="80" asp-for="@Model.Detail"></textarea>
+            <input asp-for="@Model.Bag.BottomFileName" />
+            <label asp-for="@Model.Bag.Year"></label>
+            <input asp-for="@Model.Bag.Year" />
+            <label asp-for="@Model.Bag.TextColor"></label>
+            <input asp-for="@Model.Bag.TextColor" />
+            <label asp-for="@Model.Bag.BackgroundColor"></label>
+            <input asp-for="@Model.Bag.BackgroundColor" />
+            <label asp-for="@Model.Bag.BagType"></label>
+            @foreach (Bagtypes b in Model.TypeOfBag)
+            {
+                <label value="@b.Bagtype">@b.Bagtype</label>
+                if (Model.Bag.BagType.Contains(b.Letter))
+                {
+                    <input type="checkbox" id="@(b.Letter)_Checkbox" checked onclick="toggleBagType('@b.Letter')" />
+                    BagTypeString += b.Letter;
+                }
+                else
+                {
+                    <input type="checkbox" id="@(b.Letter)_Checkbox" onclick="toggleBagType('@b.Letter')" />
+                }
+            }
+
+            <input asp-for="@Model.Bag.BagType" />
+            <label asp-for="@Model.Bag.ObtainedFrom"></label>
+            <input asp-for="@Model.Bag.ObtainedFrom" />
+            <label asp-for="@Model.Bag.NumberOfSwaps"></label>
+            <input asp-for="@Model.Bag.NumberOfSwaps" />
+            <label asp-for="@Model.Bag.DateSwapAdded"></label>
+            <input asp-for="@Model.Bag.DateSwapAdded" asp-format="{0:yyyy-MM-dd}" />
+            @*WORKS <input asp-for="@Model.Bag.DateSwapAdded" asp-format="{0:yyyy-MM-dd}" type="date" />*@
+            <label asp-for="@Model.Bag.Lost"></label>
+            <input asp-for="@Model.Bag.Lost" />
+            <label asp-for="@Model.Bag.Detail"></label>
+            <textarea rows="5" cols="80" asp-for="@Model.Bag.Detail"></textarea>
             <br>
             <input class="btn btn-info" type="submit" />
             <a class="btn btn-info" asp-controller="Bags" asp-action="Index">Cancel</a>
 
-            @await Html.PartialAsync("~/Views/Shared/_AreYouSurePartial.cshtml", Model, ViewData["Controller"] as ViewDataDictionary)
+            @await Html.PartialAsync("~/Views/Shared/_AreYouSurePartial.cshtml", Model.Bag, ViewData["Controller"] as ViewDataDictionary)
 
         </div>
     </form>
@@ -63,6 +79,16 @@
             const filestring = val.split('\\');
             const fnelements = filestring[filestring.length - 1].split('.');
             document.getElementById(tag).value = fnelements[0];
+        }
+
+        function toggleBagType(letter) {
+            var current = document.getElementById('Bag_BagType').value;
+            if (current.includes(letter)) {
+                current = current.replace(letter, '');
+            } else {
+                current += letter;
+            }
+            document.getElementById('Bag_BagType').value = current;
         }
     </script>
 

@@ -20,6 +20,7 @@ namespace AirSicknessBags.Models
         [Column(TypeName = "varchar(255)")]
         public string SecondarySite { get; set; }
         [Column(TypeName = "varchar(255)")]
+        [Display(Name = "First Name")]
         public string FirstName { get; set; }
         [Column(TypeName = "varchar(255)")]
         public string MiddleName { get; set; }
@@ -27,6 +28,8 @@ namespace AirSicknessBags.Models
         public string LastName { get; set; }
         [Column(TypeName = "varchar(255)")]
         public string Country { get; set; }
+        [Column(TypeName = "char(2)")]
+        public string IsoCountry { get; set; }
         [Column(TypeName = "varchar(255)")]
         public string PrimaryEmail { get; set; }
         [Column(TypeName = "varchar(255)")]
