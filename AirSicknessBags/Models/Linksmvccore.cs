@@ -27,5 +27,8 @@ namespace AirSicknessBags.Models
         public string MiddleName { get; set; }
         [Column(TypeName = "varchar(255)")]
         public string LastName { get; set; }
+
+        public Bagsmvc Bag { get; set; }
+        public Peoplemvc Person { get; set; }
     }
 }

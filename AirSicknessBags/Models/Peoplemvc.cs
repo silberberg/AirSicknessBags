@@ -25,6 +25,7 @@ namespace AirSicknessBags.Models
         [Column(TypeName = "varchar(255)")]
         public string MiddleName { get; set; }
         [Column(TypeName = "varchar(255)")]
+        [Display(Name ="Name")]
         public string LastName { get; set; }
         [Column(TypeName = "varchar(255)")]
         public string Country { get; set; }
@@ -45,8 +46,12 @@ namespace AirSicknessBags.Models
         [Column(TypeName = "int(11)")]
         public int? Seller { get; set; }
         [Column(TypeName = "int(11)")]
+        [Display(Name="Starter Kit")]
         public int? StarterKit { get; set; }
         [Column(TypeName = "longtext")]
         public string Comments { get; set; }
+
+        public ICollection<Linksmvccore> Links{ get; set; }
+
     }
 }

@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Extensions.Configuration;
 
 namespace AirSicknessBags.Models
 {
-    public partial class BagContext : DbContext
+    public partial class BagContext : IdentityDbContext
     {
         public BagContext(DbContextOptions<BagContext> options) : base(options)
         {
@@ -24,7 +27,7 @@ namespace AirSicknessBags.Models
         public virtual DbSet<Peoplemvc> People { get; set; }
         public virtual DbSet<Bagtypes> Types { get; set; }
         public virtual DbSet<Country> Countries { get; set; }
-        //public virtual DbSet<Linksmvccore> Linksmvccore { get; set; }
+        public virtual DbSet<Duh> Duh { get; set; }
 
         public class BagViewModel
         {
@@ -38,6 +41,57 @@ namespace AirSicknessBags.Models
             public List<Country> Countries { get; set; }
         }
 
+        public class LinkViewModel
+        {
+            public Bagsmvc Bag { get; set; }
+            public List<Peoplemvc> People { get; set; }
+            public Linksmvccore Link { get; set; }
+            public List<SelectListItem> Options { get; set; }
+        }
+
+        public class AllLinkViewModel
+        {
+            public Bagsmvc Bag { get; set; }
+            public List<Peoplemvc> People { get; set; }
+            public List<Linksmvccore> Links { get; set; }
+        }
+
+        public class Patron
+        {
+            public Peoplemvc Person { get; set; }
+            public List<Bagsmvc> Bags { get; set; }
+        }
+
+        public static string DisplayImage(string bagname)
+        {
+            if (bagname != null)
+            {
+                string img = "http://www.airsicknessbags.com/components/com_airsicknessbag/images/" + bagname + ".jpg";
+                string result = "<a href=" + img + " target=\"_blank\">";
+                result += "<span><img class=\"border border-primary border-width:8px\" src=" + img + " style=\"width: 150px\" />";
+                result += "</a></span>";
+                return (result);
+            }
+            else
+            {
+                return ("");
+            }
+        }
+
+        static public List<T> CreatePagination<T>(List<T> items, int whichpage, int perpage, ref int numpages)
+        {
+            if (items != null)
+            {
+                double stupid = Convert.ToDouble(items.Count) / perpage;
+                numpages = Convert.ToInt32(Math.Ceiling(stupid));
+                return (items.GetRange((whichpage - 1) * perpage, Math.Min(perpage, items.Count - ((whichpage - 1) * perpage))));
+            }
+            else
+            {
+                return (null);
+            }
+        }
+        
         //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         //{
         //    if (!optionsBuilder.IsConfigured)
@@ -49,6 +103,8 @@ namespace AirSicknessBags.Models
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
+
             modelBuilder.Entity<Bagsmvc>(entity =>
             {
                 entity.Property(e => e.Airline)
@@ -92,6 +148,8 @@ namespace AirSicknessBags.Models
                 entity.Property(e => e.Year)
                     .HasCharSet("utf8")
                     .HasCollation("utf8_general_ci");
+
+//                entity.Property(e => e.Links).HasColumnName("BagID");
             });
 
             modelBuilder.Entity<Linksmvccore>(entity =>

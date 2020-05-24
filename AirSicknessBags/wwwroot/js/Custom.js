@@ -4,5 +4,5 @@
 
         $('#' + deleteSpan).toggle();
         $('#' + confirmSpan).toggle();
-
 }
+

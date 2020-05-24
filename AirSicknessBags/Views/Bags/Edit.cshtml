@@ -14,21 +14,22 @@
 
         <h1>ID: @Model.Bag.Id</h1>
         <div>
-            @if (ViewBag.Operation != "Recently Copied")
+            @*@if (ViewBag.Operation != "Recently Copied")
             {
                 <input type="hidden" asp-for="@Model.Bag.Id" />
-            }
+            }*@
+            <input type="hidden" asp-for="@Model.Bag.Id" />
             <span asp-validation-for="@Model.Bag.Airline" class="text-danger"></span>
             <label asp-for="@Model.Bag.Airline"></label>
             <input asp-for="@Model.Bag.Airline" />
             <label asp-for="@Model.Bag.FrontFileName"></label>
-            <input type="file" onchange="retrieveImageName('FrontFileName', this.value)" />
+            <input type="file" onchange="retrieveImageName('Bag_FrontFileName', this.value)" />
             <input asp-for="@Model.Bag.FrontFileName" />
             <label asp-for="@Model.Bag.BackFileName"></label>
-            <input type="file" onchange="retrieveImageName('BackFileName', this.value)" />
+            <input type="file" onchange="retrieveImageName('Bag_BackFileName', this.value)" />
             <input asp-for="@Model.Bag.BackFileName" />
             <label asp-for="@Model.Bag.BottomFileName"></label>
-            <input type="file" onchange="retrieveImageName('BottomFileName', this.value)" />
+            <input type="file" onchange="retrieveImageName('Bag_BottomFileName', this.value)" />
             <input asp-for="@Model.Bag.BottomFileName" />
             <label asp-for="@Model.Bag.Year"></label>
             <input asp-for="@Model.Bag.Year" />
@@ -40,7 +41,7 @@
             @foreach (Bagtypes b in Model.TypeOfBag)
             {
                 <label value="@b.Bagtype">@b.Bagtype</label>
-                if (Model.Bag.BagType.Contains(b.Letter))
+                if (Model.Bag.BagType != null && Model.Bag.BagType.Contains(b.Letter))
                 {
                     <input type="checkbox" id="@(b.Letter)_Checkbox" checked onclick="toggleBagType('@b.Letter')" />
                     BagTypeString += b.Letter;

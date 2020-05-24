@@ -1,0 +1,25 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
+*@
+
+@section Fun {
+
+    @functions {
+        public static string DisplayImage(string bagname)
+        {
+            if (bagname != null)
+            {
+                string img = "http://www.airsicknessbags.com/components/com_airsicknessbag/images/" + bagname + ".jpg";
+                string result = "<a href=" + img + " target=\"_blank\">";
+                result += "<img src=" + img + " style=\"width: 100px\" />";
+                result += "</a>";
+                return (result);
+            }
+            else
+            {
+                return ("");
+            }
+        }
+    }
+
+}

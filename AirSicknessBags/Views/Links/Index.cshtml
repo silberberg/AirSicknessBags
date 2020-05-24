@@ -1,0 +1,70 @@
+﻿@model BagContext.AllLinkViewModel
+@*@model IEnumerable<AirSicknessBags.Models.Linksmvccore>*@
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Links[0].BagId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Links[0].PersonId)
+            </th>
+            <th>
+                Front
+            </th>
+            <th>
+                Back
+            </th>
+            <th>
+                Bottom
+            </th>
+            <th>
+                Person
+            </th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Links)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.BagId)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.PersonId)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.FrontFileName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.BackFileName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.BottomFileName)
+                </td>
+                <td>
+                    @{ 
+                        var guy = Model.People.FirstOrDefault(x => x.PersonNumber == item.PersonId);
+                        @(guy.FirstName)  @(guy.MiddleName) @(guy.LastName)
+                    }
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.LinkNumber">Edit</a> |
+                    <a asp-action="Details" asp-route-id="@item.LinkNumber">Details</a> |
+                    <a asp-action="Delete" asp-route-id="@item.LinkNumber">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -1,4 +1,5 @@
-﻿@model List<AirSicknessBags.Models.Bagsmvc>
+﻿@inject Microsoft.AspNetCore.Identity.SignInManager<IdentityUser> signInManager;
+@model List<AirSicknessBags.Models.Bagsmvc>
 @{
     ViewData["Title"] = "Bags";
 }
@@ -67,30 +68,57 @@
         </select>
     </div>
 
-        <label for="Swaps">Swaps Only?</label>
-        <input type="checkbox" id="Swaps" name="Swaps">
-        <br>
-        <input class="btn btn-info" type="submit" value="Find Bag" />
-        <a class="btn btn-info" asp-controller="Bags" asp-action="Edit">Create Bag</a>
-        <hr />
-    </div>
-    }
-
-
-    @*Display the data returned*@
-    @if (Model != null)
+    <label for="Swaps">Swaps Only?</label>
+    <input type="checkbox" id="Swaps" name="Swaps">
+    <label for="Swaps">See Every Bag (loads slowly)</label>
+    <input type="checkbox" id="SeeEveryBag" name="SeeEveryBag">
+    <br>
+    <input class="btn btn-info" type="submit" value="Find Bag" />
+    @* Only let logged in user create a bag *@
+    @if (signInManager.IsSignedIn(User))
     {
-        @foreach (var x in Model)
-        {
+        <a class="btn btn-info" asp-controller="Bags" asp-action="Edit">Create Bag</a>
+    }
+    <hr />
+    </div>
+}
+
+
+@*Display the bag(s) returned*@
+@if (Model != null)
+{
+    <h5>
+        Page @ViewBag.WhichPage of @ViewBag.NumPages <br />
+
+        Sort By:
+        <a class="btn btn-link" asp-action="Index" asp-route-sortorder="@ViewBag.NameSortParm">
+            Airline / Bag Name @if (ViewBag.NameSortParm == "airline_desc")
+            {<div>descending</div>}
+        </a>  -
+        <a class="btn btn-link" asp-action="Index" asp-route-sortorder="@ViewBag.YearSortParm">
+            Year @if (ViewBag.YearSortParm == "year_desc")
+            {<div>descending</div>}
+        </a>
+    </h5>
+
+    @foreach (var x in Model)
+    {
         <h5>
             @x.Airline- @x.Id<br />
-            @Html.Raw(@DisplayImage(x.FrontFileName))
-            @Html.Raw(@DisplayImage(x.BackFileName))
-            @Html.Raw(@DisplayImage(x.BottomFileName))<br />
-            <a class="btn btn-info" asp-controller="Bags" asp-action="Edit" asp-route-id="@x.Id">Edit Bag</a>
-            @*<a class="btn btn-info" asp-controller="Bags" asp-action="Index">Cancel</a>*@
-            <a class="btn btn-info" asp-controller="Bags" asp-action="Edit" asp-route-id="@x.Id" asp-route-copy="true">Copy Bag</a>
+            @Html.Raw(@BagContext.DisplayImage(x.FrontFileName))
+            @Html.Raw(@BagContext.DisplayImage(x.BackFileName))
+            @Html.Raw(@BagContext.DisplayImage(x.BottomFileName))<br />
+
+            @* Only let logged in user edit, copy or link bags *@
+            @if (signInManager.IsSignedIn(User))
+            {
+                <a class="btn btn-info" asp-controller="Bags" asp-action="Edit" asp-route-id="@x.Id">Edit Bag</a>
+                @*<a class="btn btn-info" asp-controller="Bags" asp-action="Index">Cancel</a>*@
+                <a class="btn btn-info" asp-controller="Bags" asp-action="Edit" asp-route-id="@x.Id" asp-route-copy="true">Copy Bag</a>
+                <a class="btn btn-info" asp-controller="Links" asp-action="Create" asp-route-id="@x.Id" asp-route-copy="true">Link Bag</a>
+            }
         </h5>
+
         @if (x.NumberOfSwaps > 0)
         {
             <h6 class="alert-heading">Swap available!</h6>
@@ -103,23 +131,26 @@
         <hr />
 
     }
-    } 
 
-
-    @functions {
-        public static string DisplayImage(string bagname)
+    <h5>
+        @if (ViewBag.WhichPage != 1 && ViewBag.NumPages != 1)
         {
-            if (bagname != null)
-            {
-                string img = "http://www.airsicknessbags.com/components/com_airsicknessbag/images/" + bagname + ".jpg";
-                string result = "<a href=" + img + " target=\"_blank\">";
-                result += "<img src=" + img + " style=\"width: 100px\" />";
-                result += "</a>";
-                return (result);
-            }
-            else
-            {
-                return ("");
-            }
+            <a class="btn btn-link" asp-controller="Bags" asp-action="Index" asp-route-sortorder="@ViewBag.SortOrder"
+               asp-route-whichpage="@(ViewBag.WhichPage - 1)">Previous @ViewBag.PerPage Bags</a>
         }
-    }
+        -
+        @if (ViewBag.WhichPage != ViewBag.NumPages && ViewBag.NumPages != 1)
+        {
+            <a class="btn btn-link" asp-controller="Bags" asp-action="Index" asp-route-sortorder="@ViewBag.SortOrder"
+               asp-route-whichpage="@(ViewBag.WhichPage + 1)">Next @ViewBag.PerPage Bags</a>
+        }
+    </h5>
+
+}
+
+
+@*@functions {
+
+        *** Moved to BagContext.cs
+
+    }*@

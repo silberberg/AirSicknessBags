@@ -1,0 +1,45 @@
+﻿@model BagContext.Patron
+
+@{
+    ViewData["Title"] = "Patron of Puke";
+}
+
+<h1>Bags Received From @Model.Person.FirstName @Model.Person.MiddleName @Model.Person.LastName, @Model.Bags.Count Bags</h1>
+
+<div>
+    <hr />
+
+
+    @*Display the bag(s) returned*@
+    @if (Model != null)
+    {
+        @foreach (var x in Model.Bags)
+        {
+            <h5>
+                @x.Airline- @x.Id (<a asp-controller="Bags" asp-action="Index" asp-route-id="@x.Id">click here</a> for bag details)<br />
+                @Html.Raw(@BagContext.DisplayImage(x.FrontFileName))
+                @Html.Raw(@BagContext.DisplayImage(x.BackFileName))
+                @Html.Raw(@BagContext.DisplayImage(x.BottomFileName))<br />
+            </h5>
+
+            @*<dl class="row">
+                    <dt class="col-sm-2">
+                        @Html.DisplayNameFor(model => model.BagId)
+                    </dt>
+                    <dd class="col-sm-10">
+                        @Html.DisplayFor(model => model.BagId)
+                    </dd>
+                </dl>*@
+        }
+    }
+</div>
+@*<div>
+        <a asp-action="Edit" asp-route-id="@Model.LinkNumber">Edit</a> |
+        <a asp-action="Index">Back to List</a>
+    </div>
+*@
+
+@*@functions {
+
+        *** Moved to BagContext.cs
+    }*@

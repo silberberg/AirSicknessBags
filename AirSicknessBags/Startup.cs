@@ -6,6 +6,7 @@ using AirSicknessBags.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,11 +27,19 @@ namespace AirSicknessBags
         public void ConfigureServices(IServiceCollection services)
         {
             string constr = Configuration.GetConnectionString("DefaultConnection");
-//            services.AddDbContext<ApplicationDBContext>(option => option.UseMySql(constr));
             services.AddDbContext<BagContext>(option => option.UseMySql(constr));
+            services.AddIdentity<IdentityUser, IdentityRole>()
+                .AddEntityFrameworkStores<BagContext>();
+            services.Configure<IdentityOptions>(option =>
+           {
+               option.Password.RequiredLength = 10;
+           });
             services.AddControllersWithViews().AddRazorRuntimeCompilation();
             //services.AddRazorPages().AddRazorRuntimeCompilation();
             //services.AddRazorPages();
+            services.AddMemoryCache();
+            services.AddScoped<ISimpleCacheService, SimpleCacheService>();
+            services.AddScoped<IGenericCacheService, ComplexCacheService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -51,6 +60,7 @@ namespace AirSicknessBags
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>

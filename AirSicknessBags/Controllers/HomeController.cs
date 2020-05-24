@@ -6,21 +6,32 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using AirSicknessBags.Models;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace AirSicknessBags.Controllers
 {
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
+//        private ISimpleCacheService _cache;
+        private IGenericCacheService _cache;
+        private readonly BagContext _context;
 
-        public HomeController(ILogger<HomeController> logger)
+        //        public HomeController(ILogger<HomeController> logger, ISimpleCacheService cache)
+        public HomeController(ILogger<HomeController> logger, IGenericCacheService cache, BagContext context)
         {
             _logger = logger;
+            _cache = cache;
+            _context = context;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View();
+            var allbags = await _cache.GetFromTable(_context.Bags);
+            var random = new Random();
+            int index = random.Next(allbags.Count);
+
+            return View(allbags[index]);
         }
 
         public IActionResult Privacy()

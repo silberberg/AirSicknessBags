@@ -48,5 +48,7 @@ namespace AirSicknessBags.Models
         [Column(TypeName = "longtext")]
         [Display(Name = "Pithy Description")]
         public string Detail { get; set; }
+
+        public ICollection<Linksmvccore> Links { get; set; }
     }
 }

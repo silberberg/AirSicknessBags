@@ -1,0 +1,38 @@
+﻿@model BagContext.LinkViewModel
+@*@model AirSicknessBags.Models.Linksmvccore*@
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1>Create</h1>
+
+<h4>Link Bags to People</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="@Model.Link.BagId" class="control-label">Linking Bag @Model.Bag.Airline</label>
+                @*<input asp-for="@Model.Link.BagId" value="@Model.Bag.Id" class="form-control" readonly="@(true)" />*@
+                <input id="BagId" name="BagId" value="@Model.Bag.Id" class="form-control" readonly="@(true)"/>
+                @*<span asp-validation-for="BagId" class="text-danger"></span>*@
+            </div>
+            <div class="form-group">
+                <label class="control-label">Link to this person</label>
+                <select name="PersonID" asp-items="@Model.Options" onchage=""></select>
+                @*<input asp-for="@Model.Link.PersonId" class="form-control" />*@
+                @*<span asp-validation-for="PersonId" class="text-danger"></span>*@
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+

@@ -4,10 +4,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
 using AirSicknessBags.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using static AirSicknessBags.Models.BagContext;
 
@@ -23,33 +25,34 @@ namespace AirSicknessBags.Controllers
 
     public class BagsController : Controller
     {
-        private readonly BagContext _db;
-        private IMemoryCache _cache;
+        private readonly ILogger<BagsController> _logger;
+        private IGenericCacheService _cache;
+        private readonly BagContext _context;
         [BindProperty]
         public BagViewModel bvm { get; set; }
         public Bagsmvc Bags { get; set; }
         public Bagtypes TypesARooney { get; set; }
+        public static IFormCollection SortedCriteria;
+        //public static int WhichPage = 1;
+        //public static int PerPage = 5;
+        //public static int NumPages = 0;
 
-        public BagsController(BagContext db)
+        public BagsController(ILogger<BagsController> logger, IGenericCacheService cache, BagContext context)
         {
-            _db = db;
-//            _cache = memoryCache;
+            _logger = logger;
+            _cache = cache;
+            _context = context;
         }
 
-        //public static class CacheKeys
-        //{
-        //    public static List<Bagtypes> bagtypes { get { return _db.Types; } }
-        //}
-
         // List of bagtypes.  Only want to get these once
-        public static List<Bagtypes> bagtypes  {get; set;} = null;
+//        public static List<Bagtypes> bagtypes  {get; set;} = null;
 
         //        private static async DbSet<Bagtypes> GetBagtypes()
-//        public static async Task<IActionResult> GetBagtypes(BagContext _db)
-        public DbSet<Bagtypes> GetBagtypes()
+//        public static async Task<IActionResult> GetBagtypes(BagContext _context)
+        public async Task<List<Bagtypes>> GetBagtypes()
         {
-            var bagtypes = _db.Types;
-            return (bagtypes);
+            var bagtypes = await _cache.GetFromTable(_context.Types);
+            return bagtypes;
         }
 
         #region API Calls
@@ -66,76 +69,164 @@ namespace AirSicknessBags.Controllers
 
             if (collection != null)
             {
-                string SearchString = collection["Airline"].ToString();
-                string DetailString = collection["Detail"].ToString();
-                string BagTypeString = collection["BagType"].ToString();
-                string ChosenYear = collection["Year"].ToString();
-                string Compare = collection["DateCompare"].ToString();
-                if (Compare == "")
+                // Get all the bags from the cache
+                var allbags = await _cache.GetFromTable(_context.Bags);
+                if (collection["SeeEveryBag"].ToString() == "on")
                 {
-                    Compare = "After";
-                    chosenYear = 0;
+                    Response = Ok(allbags) as OkObjectResult; 
                 } else
                 {
-                    chosenYear = ChosenYear == "Any" ? 0 : Convert.ToInt32(ChosenYear);
+                    string SearchString = collection["Airline"].ToString();
+                    string DetailString = collection["Detail"].ToString();
+                    string BagTypeString = collection["BagType"].ToString();
+                    string ChosenYear = collection["Year"].ToString();
+                    string Compare = collection["DateCompare"].ToString();
+
+                    if (Compare == "")
+                    {
+                        Compare = "After";
+                        chosenYear = 0;
+                    }
+                    else
+                    {
+                        chosenYear = ChosenYear == "Any" ? 0 : Stupid(ChosenYear);
+                        chosenYear = ChosenYear == "Any" ? 0 : Stupid(ChosenYear);
+                    }
+
+                    int swapcount = collection["Swaps"].ToString() == "on" ? 1 : 0;
+                    // Below, Convert.ToInt32 will return 0 when a.Year is null
+                    List<Bagsmvc> ResponseData = allbags.Where(x => x.Airline.Contains(SearchString, StringComparison.OrdinalIgnoreCase))
+                        .Where(y => y.Detail != null && y.Detail.Contains(DetailString))
+                        .Where(z => z.BagType != null && z.BagType.Contains(BagTypeString))
+                        .Where(w => w.NumberOfSwaps >= swapcount)
+                        .Where(a => chosenYear == 0 ? true :
+                            Compare == "After" ? Stupid(a.Year) > chosenYear :
+                                (Compare == "Before" ? Stupid(a.Year) < chosenYear && Stupid(a.Year) != 0 :
+                                    Stupid(a.Year) == chosenYear))
+                        .ToList();
+
+                    if (swapcount > 0)
+                    {
+                        SortedData = ResponseData.OrderByDescending(x => x.DateSwapAdded).ToList();
+                    }
+                    else
+                    {
+                        SortedData = ResponseData.OrderBy(x => x.Airline).ToList();
+                    }
+
+                    Response = Ok(SortedData) as OkObjectResult;
+
                 }
 
-                int swapcount = collection["Swaps"].ToString() == "on" ? 1 : 0;
-                // Below, Convert.ToInt32 will return 0 when a.Year is null
-                List<Bagsmvc> ResponseData = await _db.Bags.Where(x => x.Airline.Contains(SearchString, StringComparison.OrdinalIgnoreCase))
-                    .Where(y => y.Detail.Contains(DetailString))
-                    .Where(z => z.BagType.Contains(BagTypeString))
-                    .Where(w => w.NumberOfSwaps >= swapcount)
-                    .Where(a => chosenYear == 0 ? true :
-                        Compare == "After" ? Convert.ToInt32(a.Year) > chosenYear :
-                            (Compare == "Before" ? Convert.ToInt32(a.Year) < chosenYear && Convert.ToInt32(a.Year) != 0 :
-                                Convert.ToInt32(a.Year) == chosenYear))
-                    .ToListAsync();
-
-                if (swapcount > 0)
-                {
-                    SortedData = ResponseData.OrderByDescending(x => x.DateSwapAdded).ToList();
-                } else
-                {
-                    SortedData = ResponseData.OrderBy(x => x.Airline).ToList();
-                }
-
-                Response = Ok(SortedData) as OkObjectResult;
             } else
             {
                 Response = null as OkObjectResult;
             }
             return Response;
         }
+
+        private int Stupid(string year)
+        {
+            if (year == "")
+            {
+                return 0;
+            } else
+            {
+                return (Convert.ToInt32(year));
+            }
+        }
         #endregion
 
         // GET: Bags
         [HttpGet]
 #pragma warning disable CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
-        public async Task<IActionResult> Index(IFormCollection collection)
+        public async Task<IActionResult> Index(int? id, string sortorder, int? whichpage, int? perpage, int? numpages, IFormCollection collection)
 #pragma warning restore CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
         {
+            List<Bagsmvc> baglist = new List<Bagsmvc>();
             IActionResult bags;
-//            var stupid = HttpUtility.ParseQueryString(Request.QueryString);
 
-            if (collection.Count == 0)
+            // If there's pagination or sorting, we have to get data using the saved state
+            if (whichpage != null || sortorder != null)
             {
+                collection = SortedCriteria;
+            }
+
+            // Default to sorting by airline
+            string SortOrder = sortorder ?? "airline";
+//            sortorder = sortorder != null ? sortorder : "airline";
+
+            int WhichPage = whichpage ?? 1;
+            int NumPages = numpages ?? 0;
+            int PerPage = perpage ?? 5;
+
+            if (collection.Count == 0 || id != null)
+            {
+                // Returns no bags
                 bags = await GetBags(null);
             } else
             {
+                // Returns bags selected on the form
                 bags = await GetBags(collection);
             }
 
-            List<Bagsmvc> baglist = new List<Bagsmvc>();
-
             if (bags is null)
             {
-                baglist = null;
+                if (id == null)
+                {
+                    baglist = null;
+                }
+                else
+                {
+                    // Get this bag from the cache and add it to the list
+                    var allbags = await _cache.GetFromTable(_context.Bags);
+                    var b = allbags.FirstOrDefault(x => x.Id == id);
+                    baglist.Add(b);
+                }
             } else
             {
                 var okResult = bags as OkObjectResult;
                 baglist = okResult.Value as List<Bagsmvc>;
             }
+
+            // Sorting columns
+            if (baglist != null)
+            {
+                switch (SortOrder)
+                {
+                    case "airline_desc":
+                        baglist = baglist.OrderByDescending(s => s.Airline).ToList();
+                        ViewBag.NameSortParm = "airline";
+                        ViewBag.YearSortParm = "year";
+                        break;
+                    case "year":
+                        baglist = baglist.OrderBy(s => s.Year).ToList();
+                        ViewBag.NameSortParm = "airline";
+                        ViewBag.YearSortParm = "year_desc";
+                        break;
+                    case "year_desc":
+                        baglist = baglist.OrderByDescending(s => s.Year).ToList();
+                        ViewBag.NameSortParm = "airline";
+                        ViewBag.YearSortParm = "year";
+                        break;
+                    case "airline":
+                        baglist = baglist.OrderBy(s => s.Airline).ToList();
+                        ViewBag.NameSortParm = "airline_desc";
+                        ViewBag.YearSortParm = "year";
+                        break;
+                    default:
+                        baglist = null;
+                        break;
+                }
+            }
+
+            // Now we have to fetch only the page of interest.
+            baglist = CreatePagination(baglist, WhichPage, PerPage, ref NumPages);
+
+            ViewBag.SortOrder = SortOrder;
+            ViewBag.WhichPage = WhichPage;
+            ViewBag.NumPages = NumPages;
+            ViewBag.PerPage = PerPage;
 
             return View(baglist);
         }
@@ -146,16 +237,38 @@ namespace AirSicknessBags.Controllers
         public async Task<IActionResult> Index()
 #pragma warning restore CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
         {
+            int WhichPage = 1;
+            int PerPage = 5;
+            int NumPages = 0;
+            string SortOrder = "airline";
+
             string airline = Request.Form["Airline"].ToString();
             string swaps = Request.Form["Swaps"];
             // THIS WILL WORK TOO!
             //string airline2 = collection["Airline"].ToString();
-//            IActionResult bags = await GetBags(collection);
+            //            IActionResult bags = await GetBags(collection);
+            SortedCriteria = Request.Form;
             IActionResult bags = await GetBags(Request.Form);
 
             var okResult = bags as OkObjectResult;
             var baglist = okResult.Value as List<Bagsmvc>;
+            baglist = baglist.OrderBy(s => s.Airline).ToList();
+            //            baglist = BagContext.CreatePagination(baglist);
+            //double stupid = baglist.Count / PerPage;
+            //NumPages = Convert.ToInt32(Math.Ceiling(stupid));
+            //ViewBag.NumPages = NumPages;
+            //baglist = baglist.GetRange((WhichPage - 1) * PerPage, PerPage);
 
+            // Now we have to fetch only the page of interest.
+            baglist = CreatePagination(baglist, WhichPage, PerPage, ref NumPages);
+
+            ViewBag.SortOrder = SortOrder;
+            ViewBag.WhichPage = WhichPage;
+            ViewBag.NumPages = NumPages;
+            ViewBag.PerPage = PerPage;
+
+            ViewBag.NameSortParm = "airline_desc";
+            ViewBag.YearSortParm = "year";
             return View(baglist);
         }
 
@@ -197,6 +310,7 @@ namespace AirSicknessBags.Controllers
 
         // GET: Bags/Edit/5
         [HttpGet]
+        [Authorize]
         public async Task<IActionResult> Edit(int? id, bool? copy)
         {
             Bagsmvc bag = new Bagsmvc();
@@ -209,13 +323,16 @@ namespace AirSicknessBags.Controllers
             // EDIT a bag
             if(id != null)
             {
-                bag = await _db.Bags.FirstOrDefaultAsync(x => x.Id == id);
+                var allbags = await _cache.GetFromTable(_context.Bags);
+                bag = allbags.FirstOrDefault(x => x.Id == id);
             } else
             // CREATE a new blank bag
             {
                 ViewBag.Operation = "Newly Created";
-                await _db.Bags.AddAsync(bag);
-                await _db.SaveChangesAsync(); ;
+                _context.Bags.Add(bag);
+                await _context.SaveChangesAsync(); ;
+                // await _cache.AddItem(bag, _context.Bags);
+                await _cache.GetFromTable(true, _context.Bags);
             }
 
             // COPY a bag
@@ -226,17 +343,15 @@ namespace AirSicknessBags.Controllers
             {
                 ViewBag.Operation = "Recently Copied";
                 bag.Id = 0;
-                await _db.Bags.AddAsync(bag);
-                await _db.SaveChangesAsync(); ;
+                bag.Links = null;
+                await _context.Bags.AddAsync(bag);
+                await _context.SaveChangesAsync(); 
+//                await _cache.AddItem(bag, _context.Bags);
+                await _cache.GetFromTable(true, _context.Bags);
             }
 
             bvm.Bag = bag;
-            //            bvm.TypeOfBag = _db.Types;
-            if (bagtypes == null)
-            {
-                bagtypes = await _db.Types.ToListAsync();
-            }
-            bvm.TypeOfBag = bagtypes;
+            bvm.TypeOfBag = await _cache.GetFromTable(_context.Types);
 
 
             return View(bvm);
@@ -245,15 +360,18 @@ namespace AirSicknessBags.Controllers
         // POST: Bags/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(BagViewModel bvm, IFormCollection collection)
+        public async Task<ActionResult> Edit(BagViewModel bvm, IFormCollection collection)
 //        public ActionResult Edit(Bagsmvc bag, IFormCollection collection)
         {
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _db.Bags.Update(bvm.Bag);
-                    _db.SaveChanges();
+                    _context.Bags.Update(bvm.Bag);
+                    await _context.SaveChangesAsync();
+                    
+                    // Refresh the cache
+                    await _cache.GetFromTable(true, _context.Bags);
 
                     return RedirectToAction(nameof(Index));
                 }
@@ -279,28 +397,49 @@ namespace AirSicknessBags.Controllers
         {
             try
             {
-                var bag = await _db.Bags.FirstOrDefaultAsync(x => x.Id == id);
-                _db.Bags.Remove(bag);
-                await _db.SaveChangesAsync();
+                // Don't just delete the bag, delete all the links to it as well
+                // The Foreign Key should work, but doesn't reliably do so.  Who can tell why?
+                var allbags = await _cache.GetFromTable(_context.Bags);
+                var alllinks = await _cache.GetFromTable(_context.Links);
+                var bag = allbags.FirstOrDefault(x => x.Id == id);
+                var links = alllinks.Where(x => x.BagId == id).ToList();
+
+                // Remove all the links
+                links.ForEach(x => _context.Links.Remove(x));
+
+                // Remove the bag
+                _context.Bags.Remove(bag);
+                await _context.SaveChangesAsync();
+
+                // Refresh the cache
+                await _cache.GetFromTable(true, _context.Bags);
+                await _cache.GetFromTable(true, _context.Links);
 
                 return RedirectToAction(nameof(Index));
             }
-            catch
+            catch (Exception e)
             {
-                return RedirectToAction(nameof(Index));
+                string msg = "Fatal Error: You cannot delete a bag without first deleting its links";
+                return RedirectToAction(nameof(Errors), "Bags", new { message = msg } );
             }
         }
 
         // GET: Bags/Swaps5
         public ActionResult Swaps()
         {
-            var list = new List<KeyValuePair<string, string>>();
-            list.Add(new KeyValuePair<string, string>("Swaps", "on"));
+            //var list = new List<KeyValuePair<string, string>>();
+            //list.Add(new KeyValuePair<string, string>("Swaps", "on"));
             //List<string> DumbList = new List<string> { Swaps = "on" };
             //return Index(DumbList);
             //var duh = new FormCollection(new Dictionary<string, Microsoft.Extensions.Primitives.StringValues>{Swaps = "on"});
             //var duh2 = typeof(duh);
             return RedirectToAction("Index", new { Swaps = "on" });
+        }
+
+        // GET: Bags/Error
+        public ActionResult Errors(string message)
+        {
+            return View(message);
         }
 
 
