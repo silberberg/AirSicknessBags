@@ -6,22 +6,16 @@
     ViewData["Title"] = "People of Air Sickness";
 }
 
-<script type="text/javascript">
-    $(document).ready(function () {
-        alert("hello world");
-    });
-</script>
-
 @if (signInManager.IsSignedIn(User))
 {
     <p>
-        <a asp-action="Create">Create New</a>
+        <a asp-controller="People" asp-action="Edit">Create New</a>
     </p>
 }
 
 <h5>Collectors, Donated Collections, Donated a bag or several, Swappers, Sellers, Received a Starter Kit </h5>
-<div class="border container">
-    <form asp-controller="People" asp-action="Index" method="post">
+<div class="border container bg-light">
+    <form id="PeopleForm" name="PeopleForm" asp-controller="People" asp-action="Index" method="post">
 
 
         <div class="container border">
@@ -81,7 +75,7 @@
                 <a class="btn btn-info" asp-controller="People" asp-action="Edit">Create Person</a>
             }
             <hr />
-            </div>
+        </div>
 
 
 
@@ -94,9 +88,47 @@
 
 @if (Model.People != null)
 {
-    <h5>
-        Page @ViewBag.WhichPage of @ViewBag.NumPages :
-    </h5>
+    @*<h5>
+            Page @ViewBag.WhichPage of @ViewBag.NumPages :
+        </h5>*@
+    <div class="container bg-warning">
+        <div class="row">
+            <div class="col-2">
+                Page @ViewBag.WhichPage of @ViewBag.NumPages
+            </div>
+
+            <div class="col-3">
+                @if (ViewBag.WhichPage != 1 && ViewBag.NumPages != 1)
+                {
+                    <a id="PreviousPageTop" class="btn btn-link sortme" asp-controller="People" asp-action="Index"
+                       asp-route-numpages="@ViewBag.NumPages" asp-route-perpage="@ViewBag.PerPage"
+                       asp-route-whichpage="@(ViewBag.WhichPage - 1)">Previous @ViewBag.PerPage People</a>
+                }
+                -
+            </div>
+            <div class="col-3">
+                @if (ViewBag.WhichPage != ViewBag.NumPages && ViewBag.NumPages != 1)
+                {
+                    <a id="NextPageTop" class="btn btn-link sortme" asp-controller="People" asp-action="Index"
+                       asp-route-numpages="@ViewBag.NumPages" asp-route-perpage="@ViewBag.PerPage"
+                       asp-route-whichpage="@(ViewBag.WhichPage + 1)">Next @ViewBag.PerPage People</a>
+                }
+            </div>
+
+            <div class="col-2">
+                People Per Page
+                <input type="number" id="PerPage" name="PerPage" form="PeopleForm"
+                       value="@ViewBag.PerPage" class="form-control-sm w-50" />
+
+                <a class="btn btn-info sortme" asp-controller="People" asp-action="Index"
+                   asp-route-whichpage="@ViewBag.WhichPage">Apply</a>
+                <br />
+            </div>
+
+        </div>
+    </div>
+
+
     <table class="table table-responsive">
         <thead class="thead-light">
             <tr>
@@ -104,7 +136,7 @@
                     @*@Html.DisplayNameFor(model => model.People[0].FirstName) @Html.DisplayNameFor(model => model.People[0].MiddleName)*@
                     @Html.DisplayNameFor(model => model.People[0].LastName)
                 </th>
-                <th class="col-2">Gallery</th>
+                <th class="col-3">Gallery</th>
                 <th>
                     @Html.DisplayNameFor(model => model.People[0].PrimarySiteName)
                 </th>
@@ -112,7 +144,7 @@
                     @Html.DisplayNameFor(model => model.People[0].PrimarySite)
                 </th>
                 <th>
-                    @Html.DisplayNameFor(model => model.People[0].Country)
+                    @Html.DisplayNameFor(model => model.People[0].IsoCountry)
                 </th>
                 <th>
                     @Html.DisplayNameFor(model => model.People[0].PrimaryEmail)
@@ -150,105 +182,107 @@
         <tbody>
             @foreach (var item in Model.People)
             {
-            <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.FirstName)  @Html.DisplayFor(modelItem => item.MiddleName)
-                    @Html.DisplayFor(modelItem => item.LastName)
-                </td>
-                @if (item.PersonNumber != 0 && item.Links.Count != 0)
-                {
-                    <td class="col-2">
-                        <a class="btn btn-info" asp-controller="Links" asp-action="Details" asp-route-id="@item.PersonNumber">See their bags</a>
-                    </td>
-                }
-                else
-                {
-                    <td class="col-2">
-                        &nbsp;
+                <tr class="bg-warning">
+                    <td>
+                        @Html.DisplayFor(modelItem => item.FirstName)  @Html.DisplayFor(modelItem => item.MiddleName)
+                        @Html.DisplayFor(modelItem => item.LastName)
                     </td>
 
-                }
-                <td>
-                    @Html.DisplayFor(modelItem => item.PrimarySiteName)
-                </td>
-                <td>
-                    @if (item.PrimarySiteName != null && item.PrimarySiteName != "")
+                    @*Show a button if this person has a bag gallery*@
+                    @if (item.PersonNumber != 0 && item.Links.Count != 0)
                     {
-                        @*<a href="@("http://" + @item.PrimarySite)" target="_blank">@("http://" + @item.PrimarySite)</a>*@
-                        <a href="@(@item.PrimarySite)" target="_blank">@(@item.PrimarySite)</a>
+                        <td class="col-md-3">
+                            <a class="btn btn-info" asp-controller="Links" asp-action="Details" asp-route-id="@item.PersonNumber">See their bags</a>
+                        </td>
                     }
-                </td>
-                <td>
-                    @{
-                        var c = Model.Countries.FirstOrDefault(x => x.Iso == item.IsoCountry);
-                        if (c != null)
+                    else
+                    {
+                        <td class="col-2">
+                            &nbsp;
+                        </td>
+
+                    }
+                    <td>
+                        @Html.DisplayFor(modelItem => item.PrimarySiteName)
+                    </td>
+                    <td>
+                        @if (item.PrimarySiteName != null && item.PrimarySiteName != "")
                         {
-                            @c.Name
+                            @*<a href="@("http://" + @item.PrimarySite)" target="_blank">@("http://" + @item.PrimarySite)</a>*@
+                            <a href="@(@item.PrimarySite)" target="_blank">@(@item.PrimarySite)</a>
                         }
-                    }
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.PrimaryEmail)
-                </td>
-                <td class="col-1">
-                    @if (@item.Collector == 1)
-                    {
-                        <label asp-for="@item.Collector"></label>
-                    }
-                    @if (@item.Donor == 1)
-                    {
-                        <label asp-for="@item.Donor"></label>
-                    }
-                    @if (@item.Swapper == 1)
-                    {
-                        <label asp-for="@item.Swapper"></label>
-                    }
-                    @if (@item.Seller == 1)
-                    {
-                        <label asp-for="@item.Seller"></label>
-                    }
-                    @if (@item.StarterKit == 1)
-                    {
-                        <label asp-for="@item.StarterKit"></label>
-                    }
-                </td>
-                <td class="col-4">
-                    @Html.Raw(item.Comments)
-                </td>
-                @if (signInManager.IsSignedIn(User))
-                {
-                    <td>
-                        <a id="EditPeopleButton" class="btn btn-info" asp-controller="People" asp-action="Edit" asp-route-id="@item.PersonNumber">Edit</a>
                     </td>
-                }
-                @if (item.PersonNumber != 0)
-                {
                     <td>
-                        <a class="btn btn-info" asp-controller="People" asp-action="Details" asp-route-id="@item.PersonNumber">Details</a>
+                        @{
+                            var c = Model.Countries.FirstOrDefault(x => x.Iso == item.IsoCountry);
+                            if (c != null)
+                            {
+                                @c.Name
+                            }
+                        }
                     </td>
-                }
-                @if (signInManager.IsSignedIn(User))
-                {
                     <td>
-                        <a class="btn btn-info" asp-controller="People" asp-action="Delete" asp-route-id="@item.PersonNumber">Delete</a>
+                        @Html.DisplayFor(modelItem => item.PrimaryEmail)
                     </td>
-                }
-                <td>
-                    @Html.DisplayFor(modelItem => item.SecondarySiteName)
-                </td>
-                <td>
-                    @if (item.SecondarySite != null && item.SecondarySiteName != "")
+                    <td class="col-1">
+                        @if (@item.Collector == 1)
+                        {
+                            <label asp-for="@item.Collector"></label>
+                        }
+                        @if (@item.Donor == 1)
+                        {
+                            <label asp-for="@item.Donor"></label>
+                        }
+                        @if (@item.Swapper == 1)
+                        {
+                            <label asp-for="@item.Swapper"></label>
+                        }
+                        @if (@item.Seller == 1)
+                        {
+                            <label asp-for="@item.Seller"></label>
+                        }
+                        @if (@item.StarterKit == 1)
+                        {
+                            <label asp-for="@item.StarterKit"></label>
+                        }
+                    </td>
+                    <td class="col-4">
+                        @Html.Raw(item.Comments)
+                    </td>
+                    @if (signInManager.IsSignedIn(User))
                     {
-                        <a href="@(@item.SecondarySite)" target="_blank">@(@item.SecondarySite)</a>
+                        <td>
+                            <a id="EditPeopleButton" class="btn btn-info" asp-controller="People" asp-action="Edit" asp-route-id="@item.PersonNumber">Edit</a>
+                        </td>
                     }
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.SecondaryEmail)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.TertiaryEmail)
-                </td>
-            </tr>
+                    @if (item.PersonNumber != 0)
+                    {
+                        <td>
+                            <a class="btn btn-info" asp-controller="People" asp-action="Details" asp-route-id="@item.PersonNumber">Details</a>
+                        </td>
+                    }
+                    @if (signInManager.IsSignedIn(User))
+                    {
+                        <td>
+                            <a class="btn btn-info" asp-controller="People" asp-action="Delete" asp-route-id="@item.PersonNumber">Delete</a>
+                        </td>
+                    }
+                    <td>
+                        @Html.DisplayFor(modelItem => item.SecondarySiteName)
+                    </td>
+                    <td>
+                        @if (item.SecondarySite != null && item.SecondarySiteName != "")
+                        {
+                            <a href="@(@item.SecondarySite)" target="_blank">@(@item.SecondarySite)</a>
+                        }
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.SecondaryEmail)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.TertiaryEmail)
+                    </td>
+                </tr>
             }
         </tbody>
     </table>
@@ -269,4 +303,11 @@
         }
     </h5>
 }
+
+
+@*<script type="text/javascript">
+        $(document).ready(function () {
+            alert("hello world");
+        });
+    </script>*@
 

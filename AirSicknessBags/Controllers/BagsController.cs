@@ -33,9 +33,6 @@ namespace AirSicknessBags.Controllers
         public Bagsmvc Bags { get; set; }
         public Bagtypes TypesARooney { get; set; }
         public static IFormCollection SortedCriteria;
-        //public static int WhichPage = 1;
-        //public static int PerPage = 5;
-        //public static int NumPages = 0;
 
         public BagsController(ILogger<BagsController> logger, IGenericCacheService cache, BagContext context)
         {
@@ -44,11 +41,6 @@ namespace AirSicknessBags.Controllers
             _context = context;
         }
 
-        // List of bagtypes.  Only want to get these once
-//        public static List<Bagtypes> bagtypes  {get; set;} = null;
-
-        //        private static async DbSet<Bagtypes> GetBagtypes()
-//        public static async Task<IActionResult> GetBagtypes(BagContext _context)
         public async Task<List<Bagtypes>> GetBagtypes()
         {
             var bagtypes = await _cache.GetFromTable(_context.Types);
@@ -78,6 +70,8 @@ namespace AirSicknessBags.Controllers
                 {
                     string SearchString = collection["Airline"].ToString();
                     string DetailString = collection["Detail"].ToString();
+                    string ColorString = collection["TextColor"].ToString();
+                    string BackgroundString = collection["BackgroundColor"].ToString();
                     string BagTypeString = collection["BagType"].ToString();
                     string ChosenYear = collection["Year"].ToString();
                     string Compare = collection["DateCompare"].ToString();
@@ -89,20 +83,22 @@ namespace AirSicknessBags.Controllers
                     }
                     else
                     {
-                        chosenYear = ChosenYear == "Any" ? 0 : Stupid(ChosenYear);
-                        chosenYear = ChosenYear == "Any" ? 0 : Stupid(ChosenYear);
+                        chosenYear = ChosenYear == "Any" ? 0 : ReturnInt(ChosenYear);
+                        chosenYear = ChosenYear == "Any" ? 0 : ReturnInt(ChosenYear);
                     }
 
                     int swapcount = collection["Swaps"].ToString() == "on" ? 1 : 0;
                     // Below, Convert.ToInt32 will return 0 when a.Year is null
                     List<Bagsmvc> ResponseData = allbags.Where(x => x.Airline.Contains(SearchString, StringComparison.OrdinalIgnoreCase))
-                        .Where(y => y.Detail != null && y.Detail.Contains(DetailString))
-                        .Where(z => z.BagType != null && z.BagType.Contains(BagTypeString))
+                        .Where(y => y.Detail != null && y.Detail.Contains(DetailString, StringComparison.OrdinalIgnoreCase))
+                        .Where(z => z.BagType != null && z.BagType.Contains(BagTypeString, StringComparison.OrdinalIgnoreCase))
+                        .Where(b => b.TextColor != null && b.TextColor.Contains(ColorString, StringComparison.OrdinalIgnoreCase))
+                        .Where(c => c.BackgroundColor != null && c.BackgroundColor.Contains(BackgroundString, StringComparison.OrdinalIgnoreCase))
                         .Where(w => w.NumberOfSwaps >= swapcount)
                         .Where(a => chosenYear == 0 ? true :
-                            Compare == "After" ? Stupid(a.Year) > chosenYear :
-                                (Compare == "Before" ? Stupid(a.Year) < chosenYear && Stupid(a.Year) != 0 :
-                                    Stupid(a.Year) == chosenYear))
+                            Compare == "After" ? ReturnInt(a.Year) > chosenYear :
+                                (Compare == "Before" ? ReturnInt(a.Year) < chosenYear && ReturnInt(a.Year) != 0 :
+                                    ReturnInt(a.Year) == chosenYear))
                         .ToList();
 
                     if (swapcount > 0)
@@ -125,7 +121,7 @@ namespace AirSicknessBags.Controllers
             return Response;
         }
 
-        private int Stupid(string year)
+        private int ReturnInt(string year)
         {
             if (year == "")
             {
@@ -145,6 +141,8 @@ namespace AirSicknessBags.Controllers
         {
             List<Bagsmvc> baglist = new List<Bagsmvc>();
             IActionResult bags;
+
+            ViewBag.Swaps = 0;
 
             // If there's pagination or sorting, we have to get data using the saved state
             if (whichpage != null || sortorder != null)
@@ -192,31 +190,65 @@ namespace AirSicknessBags.Controllers
             // Sorting columns
             if (baglist != null)
             {
-                switch (SortOrder)
+                if (collection["Swaps"].ToString() == "on")
                 {
-                    case "airline_desc":
-                        baglist = baglist.OrderByDescending(s => s.Airline).ToList();
-                        ViewBag.NameSortParm = "airline";
-                        ViewBag.YearSortParm = "year";
-                        break;
-                    case "year":
-                        baglist = baglist.OrderBy(s => s.Year).ToList();
-                        ViewBag.NameSortParm = "airline";
-                        ViewBag.YearSortParm = "year_desc";
-                        break;
-                    case "year_desc":
-                        baglist = baglist.OrderByDescending(s => s.Year).ToList();
-                        ViewBag.NameSortParm = "airline";
-                        ViewBag.YearSortParm = "year";
-                        break;
-                    case "airline":
-                        baglist = baglist.OrderBy(s => s.Airline).ToList();
-                        ViewBag.NameSortParm = "airline_desc";
-                        ViewBag.YearSortParm = "year";
-                        break;
-                    default:
-                        baglist = null;
-                        break;
+                    ViewBag.Swaps = 1;
+
+                    switch (SortOrder)
+                    {
+                        case "airline_desc":
+                            baglist = baglist.OrderByDescending(x => x.DateSwapAdded).ThenByDescending(s => s.Airline).ToList();
+                            ViewBag.NameSortParm = "airline";
+                            ViewBag.YearSortParm = "year";
+                            break;
+                        case "year":
+                            baglist = baglist.OrderByDescending(x => x.DateSwapAdded).ThenBy(s => s.Year).ToList();
+                            ViewBag.NameSortParm = "airline";
+                            ViewBag.YearSortParm = "year_desc";
+                            break;
+                        case "year_desc":
+                            baglist = baglist.OrderByDescending(x => x.DateSwapAdded).ThenByDescending(s => s.Year).ToList();
+                            ViewBag.NameSortParm = "airline";
+                            ViewBag.YearSortParm = "year";
+                            break;
+                        case "airline":
+                            baglist = baglist.OrderByDescending(x => x.DateSwapAdded).ThenBy(s => s.Airline).ToList();
+                            ViewBag.NameSortParm = "airline_desc";
+                            ViewBag.YearSortParm = "year";
+                            break;
+                        default:
+                            baglist = null;
+                            break;
+                    }
+                }
+                else
+                {
+                    switch (SortOrder)
+                    {
+                        case "airline_desc":
+                            baglist = baglist.OrderByDescending(s => s.Airline).ToList();
+                            ViewBag.NameSortParm = "airline";
+                            ViewBag.YearSortParm = "year";
+                            break;
+                        case "year":
+                            baglist = baglist.OrderBy(s => s.Year).ToList();
+                            ViewBag.NameSortParm = "airline";
+                            ViewBag.YearSortParm = "year_desc";
+                            break;
+                        case "year_desc":
+                            baglist = baglist.OrderByDescending(s => s.Year).ToList();
+                            ViewBag.NameSortParm = "airline";
+                            ViewBag.YearSortParm = "year";
+                            break;
+                        case "airline":
+                            baglist = baglist.OrderBy(s => s.Airline).ToList();
+                            ViewBag.NameSortParm = "airline_desc";
+                            ViewBag.YearSortParm = "year";
+                            break;
+                        default:
+                            baglist = null;
+                            break;
+                    }
                 }
             }
 
@@ -234,12 +266,12 @@ namespace AirSicknessBags.Controllers
         // Post: Bags
         [HttpPost]
 #pragma warning disable CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int? whichpage, int? perpage, int? numpages, IFormCollection collection)
 #pragma warning restore CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
         {
-            int WhichPage = 1;
-            int PerPage = 5;
-            int NumPages = 0;
+            int WhichPage = whichpage ?? 1;
+            int PerPage = perpage ?? 5;
+            int NumPages = numpages ?? 0;
             string SortOrder = "airline";
 
             string airline = Request.Form["Airline"].ToString();
@@ -252,12 +284,16 @@ namespace AirSicknessBags.Controllers
 
             var okResult = bags as OkObjectResult;
             var baglist = okResult.Value as List<Bagsmvc>;
-            baglist = baglist.OrderBy(s => s.Airline).ToList();
-            //            baglist = BagContext.CreatePagination(baglist);
-            //double stupid = baglist.Count / PerPage;
-            //NumPages = Convert.ToInt32(Math.Ceiling(stupid));
-            //ViewBag.NumPages = NumPages;
-            //baglist = baglist.GetRange((WhichPage - 1) * PerPage, PerPage);
+            if (collection["Swaps"].ToString() == "on")
+            {
+                ViewBag.Swaps = 1;
+                baglist = baglist.OrderByDescending(s => s.DateSwapAdded).ThenBy(x => x.Airline).ToList();
+            }
+            else
+            {
+                ViewBag.Swaps = 0;
+                baglist = baglist.OrderBy(s => s.Airline).ToList();
+            }
 
             // Now we have to fetch only the page of interest.
             baglist = CreatePagination(baglist, WhichPage, PerPage, ref NumPages);
@@ -273,18 +309,22 @@ namespace AirSicknessBags.Controllers
         }
 
         // GET: Bags/Details/5
+        [HttpGet]
         public ActionResult Details(int id)
         {
             return View();
         }
 
         // GET: Bags/Create
+        [Authorize]
+        [HttpGet]
         public ActionResult Create()
         {
             return View();
         }
 
         // POST: Bags/Create
+        [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Create(IFormCollection collection)
@@ -309,12 +349,15 @@ namespace AirSicknessBags.Controllers
 
 
         // GET: Bags/Edit/5
+        [Authorize]
         [HttpGet]
         [Authorize]
         public async Task<IActionResult> Edit(int? id, bool? copy)
         {
             Bagsmvc bag = new Bagsmvc();
             BagViewModel bvm = new BagViewModel();
+            bvm.People = await _cache.GetFromTable(_context.People);
+            bvm.People = bvm.People.OrderBy(x => x.FirstName).ToList();
             ViewBag.Operation = "Edit This";
 
             // First set up the bagtype dropdown
@@ -331,7 +374,6 @@ namespace AirSicknessBags.Controllers
                 ViewBag.Operation = "Newly Created";
                 _context.Bags.Add(bag);
                 await _context.SaveChangesAsync(); ;
-                // await _cache.AddItem(bag, _context.Bags);
                 await _cache.GetFromTable(true, _context.Bags);
             }
 
@@ -353,15 +395,14 @@ namespace AirSicknessBags.Controllers
             bvm.Bag = bag;
             bvm.TypeOfBag = await _cache.GetFromTable(_context.Types);
 
-
             return View(bvm);
         }
 
         // POST: Bags/Edit/5
+        [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Edit(BagViewModel bvm, IFormCollection collection)
-//        public ActionResult Edit(Bagsmvc bag, IFormCollection collection)
         {
             if (ModelState.IsValid)
             {
@@ -385,18 +426,22 @@ namespace AirSicknessBags.Controllers
         }
 
         // GET: Bags/Delete/5
+        [Authorize]
+        [HttpGet]
         public ActionResult Delete(int id)
         {
             return View();
         }
 
         // POST: Bags/Delete/5
+        [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete([Bind("Id")] int id, IFormCollection collection)
         {
             try
             {
+                // Can this be done using the Links Navigation Property?
                 // Don't just delete the bag, delete all the links to it as well
                 // The Foreign Key should work, but doesn't reliably do so.  Who can tell why?
                 var allbags = await _cache.GetFromTable(_context.Bags);
@@ -427,12 +472,6 @@ namespace AirSicknessBags.Controllers
         // GET: Bags/Swaps5
         public ActionResult Swaps()
         {
-            //var list = new List<KeyValuePair<string, string>>();
-            //list.Add(new KeyValuePair<string, string>("Swaps", "on"));
-            //List<string> DumbList = new List<string> { Swaps = "on" };
-            //return Index(DumbList);
-            //var duh = new FormCollection(new Dictionary<string, Microsoft.Extensions.Primitives.StringValues>{Swaps = "on"});
-            //var duh2 = typeof(duh);
             return RedirectToAction("Index", new { Swaps = "on" });
         }
 

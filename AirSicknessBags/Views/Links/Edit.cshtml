@@ -1,4 +1,5 @@
-﻿@model AirSicknessBags.Models.Linksmvccore
+﻿@model BagContext.AllLinkViewModel
+@*@model AirSicknessBags.Models.Linksmvccore*@
 
 @{
     ViewData["Title"] = "Edit";
@@ -6,55 +7,54 @@
 
 <h1>Edit</h1>
 
-<h4>Linksmvccore</h4>
+<h4>Link Bags and People</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
         <form asp-action="Edit">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="LinkNumber" />
+            @*<input type="hidden" asp-for="Link.LinkNumber" />*@
+            <input asp-for="Link.LinkNumber" />
             <div class="form-group">
-                <label asp-for="BagId" class="control-label"></label>
-                <input asp-for="BagId" class="form-control" />
-                <span asp-validation-for="BagId" class="text-danger"></span>
+                <label asp-for="Link.BagId" class="control-label"></label>
+                <input type="number" asp-for="Link.BagId" class="form-control" />
+                <span asp-validation-for="Link.BagId" class="text-danger"></span>
+                <select class="col-12" onchange="document.getElementById('Link_BagId').value = this.value;" id="Bag" name="Bag">
+                    @foreach (var bag in Model.Bags)
+                    {
+                        @if (bag.Id == Model.Link.BagId)
+                        {
+                            <option value="@bag.Id" selected>@bag.Id : @bag.Airline @bag.FrontFileName</option>
+                        }
+                        else
+                        {
+                            <option value="@bag.Id">@bag.Id : @bag.Airline @bag.FrontFileName</option>
+                        }
+                    }
+                </select>
+
             </div>
             <div class="form-group">
-                <label asp-for="PersonId" class="control-label"></label>
-                <input asp-for="PersonId" class="form-control" />
-                <span asp-validation-for="PersonId" class="text-danger"></span>
+                <label asp-for="Link.PersonId" class="control-label"></label>
+                <input type="number" asp-for="Link.PersonId" class="form-control" />
+                <span asp-validation-for="Link.PersonId" class="text-danger"></span>
+                <select class="col-12" onchange="document.getElementById('Link_PersonId').value = this.value;" id="Person" name="Person">
+                    @foreach (var person in Model.People)
+                    {
+                        @if (person.PersonNumber == Model.Link.PersonId)
+                        {
+                            <option value="@person.PersonNumber" selected>@person.PersonNumber : @person.FirstName @person.MiddleName @person.LastName</option>
+                        }
+                        else
+                        {
+                            <option value="@person.PersonNumber">@person.PersonNumber : @person.FirstName @person.MiddleName @person.LastName</option>
+                        }
+                    }
+                </select>
             </div>
+
             <div class="form-group">
-                <label asp-for="FrontFileName" class="control-label"></label>
-                <input asp-for="FrontFileName" class="form-control" />
-                <span asp-validation-for="FrontFileName" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="BackFileName" class="control-label"></label>
-                <input asp-for="BackFileName" class="form-control" />
-                <span asp-validation-for="BackFileName" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="BottomFileName" class="control-label"></label>
-                <input asp-for="BottomFileName" class="form-control" />
-                <span asp-validation-for="BottomFileName" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="FirstName" class="control-label"></label>
-                <input asp-for="FirstName" class="form-control" />
-                <span asp-validation-for="FirstName" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="MiddleName" class="control-label"></label>
-                <input asp-for="MiddleName" class="form-control" />
-                <span asp-validation-for="MiddleName" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="LastName" class="control-label"></label>
-                <input asp-for="LastName" class="form-control" />
-                <span asp-validation-for="LastName" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
+                <input type="submit" value="Save" asp-route-everything="@Model" class="btn btn-primary" />
             </div>
         </form>
     </div>

@@ -1,4 +1,5 @@
 ﻿@inject Microsoft.AspNetCore.Identity.SignInManager<IdentityUser> signInManager;
+@inject BagContext _context;
 @model List<AirSicknessBags.Models.Bagsmvc>
 @{
     ViewData["Title"] = "Bags";
@@ -6,151 +7,249 @@
 
 <h1>Bag List</h1>
 
-@using (Html.BeginForm("Index", "Bags", FormMethod.Post))
+@*@using (Html.BeginForm("Index", "Bags", FormMethod.Post))*@
 
-{
-<div class="container border">
-    <div class="form-group row">
-        <div class="col-2">Find Airline</div>
-        <div class="col-3">
-            <input type="text" id="Airline" name="Airline" />
-        </div>
-        <div class="col-3">Bag Details Contain</div>
-        <div class="col-3">
-            <input type="text" id="Detail" name="Detail" />
-        </div>
-    </div>
 
-    <div class="form-group row">
-        <div class="col-2">
-            <label for="BagType">Type of Bag:</label>
+<form id="BagForm" asp-controller="Bags" asp-action="Index" method="post">
+    <div class="container border border-primary p-2 m-1 bg-light">
+        <div class="form-group row">
+            <div class="col-4">
+                <h5>
+                    Find Airline
+                    <input type="text" id="Airline" name="Airline" class="form-control-sm" value="Part or all of bag name"
+                           onclick="ClearOutFields(['Airline']);" />
+                </h5>
+            </div>
+            <div class="col-4">
+                <h5>
+                    Details Contain
+                    <input type="text" id="Detail" name="Detail" class="form-control-sm" value="Part or all of bag details"
+                           onclick="ClearOutFields(['Detail']);" />
+                </h5>
+            </div>
+            <div class="col-1">
+                <label for="BagType">Type:</label>
+            </div>
+            <div class="col-2">
+                <select id="BagType" name="BagType" class="form-control-sm">
+                    <option value="">Any</option>
+                    <option value="A">Air Sickness</option>
+                    <option value="S">Sea Sickness</option>
+                    <option value="C">Car Sickness</option>
+                    <option value="B">Bus Sickness</option>
+                    <option value="T">Train Sickness</option>
+                    <option value="P">Space Sickness</option>
+                    <option value="D">Video Games</option>
+                    <option value="L">Political</option>
+                    <option value="M">Movie</option>
+                    <option value="E">Medical</option>
+                    <option value="U">Musical</option>
+                    <option value="O">Odd/Unique</option>
+                    <option value="G">Generic</option>
+                    <option value="N">Unknown</option>
+                    <option value="V">Favorites</option>
+                </select>
+            </div>
+
         </div>
-        <div class="col-2">
-            <select id="BagType" name="BagType">
-                <option value="">Any</option>
-                <option value="A">Air Sickness</option>
-                <option value="S">Sea Sickness</option>
-                <option value="C">Car Sickness</option>
-                <option value="B">Bus Sickness</option>
-                <option value="T">Train Sickness</option>
-                <option value="P">Space Sickness</option>
-                <option value="V">Video Games</option>
-                <option value="L">Political</option>
-                <option value="M">Movie</option>
-                <option value="E">Medical</option>
-                <option value="U">Musical</option>
-                <option value="O">Odd/Unique</option>
-                <option value="G">Generic</option>
-                <option value="N">Unknown</option>
+
+        <div class="form-group row">
+
+            <div class="col-1">
+                <label for="Equal">Equal</label>
+                <input type="radio" id="Equal" name="DateCompare" value="Equal">
+            </div>
+            <div class="col-1">
+                <label for="Before">Before</label>
+                <input type="radio" id="Before" name="DateCompare" value="Before">
+            </div>
+
+            <div class="col-1">
+                <label for="After">After</label>
+                <input type="radio" id="After" name="DateCompare" value="After">
+            </div>
+
+            <select class="col-1" id="Year" name="Year">
+                <option value="Any">Any</option>
+                @for (int i = 1959; i < DateTime.Now.Year; i++)
+                {
+                    <option value="@i">@i</option>
+                }
             </select>
+            <div class="col-4">
+                <h6>
+                    Text Color
+                    <input type="text" id="TextColor" name="TextColor" class="form-control-sm" />
+                </h6>
+            </div>
+            <div class="col-4">
+                <h6>
+                    Background Color
+                    <input type="text" id="BackgroundColor" name="BackgroundColor" class="form-control-sm" />
+                </h6>
+            </div>
+
         </div>
 
-        <div class="col-2">
-            <label for="Equal">Equal</label>
-            <input type="radio" id="Equal" name="DateCompare" value="Equal">
-        </div>
-        <div class="col-2">
-            <label for="Before">Before</label>
-            <input type="radio" id="Before" name="DateCompare" value="Before">
+        <div class="form-group row">
+            <div class="col-2">
+                <label for="Swaps">Swaps Only?</label>
+                <input type="checkbox" id="Swaps" name="Swaps" @(ViewBag.Swaps == 1 ? "checked" : "")>
+            </div>
+            <div class="col-3">
+                <label for="SeeEveryBag">See Every Bag (may load slowly)</label>
+                <input type="checkbox" id="SeeEveryBag" name="SeeEveryBag">
+            </div>
+            <div class="col-2">
+                <input class="btn btn-info" type="submit" value="Find Bag" onclick="ClearOutFields(['Airline', 'Detail']);" />
+            </div>
+            <div class="col-2">
+                @* Only let logged in user create a bag *@
+                @if (signInManager.IsSignedIn(User))
+                {
+                    <a class="btn btn-info" asp-controller="Bags" asp-action="Edit">Create Bag</a>
+                }
+            </div>
         </div>
 
-        <div class="col-2">
-            <label for="After">After</label>
-            <input type="radio" id="After" name="DateCompare" value="After">
-        </div>
-
-        <select class="col-2" id="Year" name="Year">
-            <option value="Any">Any</option>
-            @for (int i = 1959; i < DateTime.Now.Year; i++)
-            {
-                <option value="@i">@i</option>
-            }
-        </select>
     </div>
-
-    <label for="Swaps">Swaps Only?</label>
-    <input type="checkbox" id="Swaps" name="Swaps">
-    <label for="Swaps">See Every Bag (loads slowly)</label>
-    <input type="checkbox" id="SeeEveryBag" name="SeeEveryBag">
-    <br>
-    <input class="btn btn-info" type="submit" value="Find Bag" />
-    @* Only let logged in user create a bag *@
-    @if (signInManager.IsSignedIn(User))
-    {
-        <a class="btn btn-info" asp-controller="Bags" asp-action="Edit">Create Bag</a>
-    }
-    <hr />
-    </div>
-}
+</form>
 
 
-@*Display the bag(s) returned*@
-@if (Model != null)
-{
-    <h5>
-        Page @ViewBag.WhichPage of @ViewBag.NumPages <br />
+        @*Display the bag(s) returned*@
+        @if (Model != null)
+        {
+            <div class="container border border-dark p-2 m-1 bg-warning">
+                <div class="form-group row">
+                    @if(ViewBag.Swaps == 1)
+                    {
+                        <div class="col-2">
+                            <h2>Swaps</h2>
+                            <h6>Uncheck above to clear swaps</h6>
+                            </div>
+                    }
+                <div class="col-2">
+                    Page @ViewBag.WhichPage of @ViewBag.NumPages <br />
+                    <h5>
+                        @if (ViewBag.WhichPage != 1 && ViewBag.NumPages != 1)
+                        {
+                            <a id="PreviousPageTop" class="btn btn-link sortme" asp-controller="Bags" asp-action="Index"
+                               asp-route-sortorder="@ViewBag.SortOrder"
+                               asp-route-whichpage="@(ViewBag.WhichPage - 1)">Previous @ViewBag.PerPage Bags</a>
+                        }
+                        -
+                        @if (ViewBag.WhichPage != ViewBag.NumPages && ViewBag.NumPages != 1)
+                        {
+                            <a id="NextPageTop" class="btn btn-link sortme" asp-controller="Bags" asp-action="Index"
+                               asp-route-sortorder="@ViewBag.SortOrder"
+                               asp-route-whichpage="@(ViewBag.WhichPage + 1)">Next @ViewBag.PerPage Bags</a>
+                        }
+                    </h5>
 
-        Sort By:
-        <a class="btn btn-link" asp-action="Index" asp-route-sortorder="@ViewBag.NameSortParm">
-            Airline / Bag Name @if (ViewBag.NameSortParm == "airline_desc")
-            {<div>descending</div>}
-        </a>  -
-        <a class="btn btn-link" asp-action="Index" asp-route-sortorder="@ViewBag.YearSortParm">
-            Year @if (ViewBag.YearSortParm == "year_desc")
-            {<div>descending</div>}
-        </a>
-    </h5>
+                </div>
+                    <div class="col-2">
+                        Bags Per Page
+                        <input type="number" id="PerPage" name="PerPage" form="BagForm"
+                               value="@ViewBag.PerPage" class="form-control-sm w-50" />
+                               @*onchange="fillNavigationAttributes(['PreviousPage', 'NextPage'], this.value);" />*@
+                        <a id="PreviousPage" class="btn btn-info sortme" asp-controller="Bags" asp-action="Index"
+                           asp-route-sortorder="@ViewBag.SortOrder"
+                           asp-route-whichpage="@ViewBag.WhichPage">Apply</a>
+                        <br />
+                        @*onchange="alert(this.value);" /><br />*@
+                    </div>
+                    <div class="col-1">
+                        Sort By:
+                    </div>
+                    <div class="col-3">
+                        <a class="btn btn-link sortme" asp-action="Index" asp-route-sortorder="@ViewBag.NameSortParm"
+                           id="NameSort" name="NameSort">
+                            Airline / Bag Name @if (ViewBag.NameSortParm == "airline_desc")
+                            {<div>descending</div>}
+                        </a>  -
+                    </div>
+                    <div class="col-1">
+                        <a class="btn btn-link sortme" asp-action="Index" asp-route-sortorder="@ViewBag.YearSortParm"
+                            id="YearSort" name="YearSort">
+                            Year @if (ViewBag.YearSortParm == "year_desc")
+                            {<div>descending</div>}
+                        </a>
+                    </div>
+                </div>
+            </div>
 
-    @foreach (var x in Model)
-    {
-        <h5>
-            @x.Airline- @x.Id<br />
-            @Html.Raw(@BagContext.DisplayImage(x.FrontFileName))
-            @Html.Raw(@BagContext.DisplayImage(x.BackFileName))
-            @Html.Raw(@BagContext.DisplayImage(x.BottomFileName))<br />
-
-            @* Only let logged in user edit, copy or link bags *@
-            @if (signInManager.IsSignedIn(User))
+            @foreach (var x in Model)
             {
-                <a class="btn btn-info" asp-controller="Bags" asp-action="Edit" asp-route-id="@x.Id">Edit Bag</a>
-                @*<a class="btn btn-info" asp-controller="Bags" asp-action="Index">Cancel</a>*@
-                <a class="btn btn-info" asp-controller="Bags" asp-action="Edit" asp-route-id="@x.Id" asp-route-copy="true">Copy Bag</a>
-                <a class="btn btn-info" asp-controller="Links" asp-action="Create" asp-route-id="@x.Id" asp-route-copy="true">Link Bag</a>
+                <div class="container border border-dark p-2 m-1 bg-primary">
+                    <div class="form-group row">
+                        <div class="col-lg-6">
+                            <h4>
+                                @x.Airline
+                                @if (signInManager.IsSignedIn(User))
+                                {
+                                    <span>- @x.Id</span>
+                                }
+                            </h4>
+                        </div>
+                        <div class="col-lg-6">
+                            @if (x.NumberOfSwaps > 0)
+                            {
+                                <h5 class="alert-heading">Swap available!</h5>
+                            }
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-4">
+                            @Html.Raw(@BagContext.DisplayImage(x.FrontFileName))
+                            @Html.Raw(@BagContext.DisplayImage(x.BackFileName))
+                            @Html.Raw(@BagContext.DisplayImage(x.BottomFileName))<br />
+                        </div>
+                        <div class="col-8">
+                            <h5>
+                                @(x.Year != null ? "Approximate Year: " + x.Year + ", " : "")
+                                <strong>
+                                    @(x.Person.FirstName != null || x.Person.LastName != null ? 
+                                        "Originally Obtained From: " + x.Person.FirstName + 
+                                        ' ' + x.Person.MiddleName + ' ' + x.Person.LastName + ", " : "")
+                                </strong>
+                                @Html.Raw(x.Detail)
+                            </h5>
+                        </div>
+                        <div class="col-8">
+                            @* Only let logged in user edit, copy or link bags *@
+                            @if (signInManager.IsSignedIn(User))
+                            {
+                                <a class="btn btn-info" asp-controller="Bags" asp-action="Edit" asp-route-id="@x.Id">Edit Bag</a>
+                                <a class="btn btn-info" asp-controller="Bags" asp-action="Index">Cancel</a>
+                                <a class="btn btn-info" asp-controller="Bags" asp-action="Edit" asp-route-id="@x.Id" asp-route-copy="true">Copy Bag</a>
+                                <a class="btn btn-info" asp-controller="Links" asp-action="Create" asp-route-id="@x.Id" asp-route-copy="true">Link Bag</a>
+                            }
+                        </div>
+                    </div>
+                </div>
             }
-        </h5>
 
-        @if (x.NumberOfSwaps > 0)
-        {
-            <h6 class="alert-heading">Swap available!</h6>
+            <h5>
+                @if (ViewBag.WhichPage != 1 && ViewBag.NumPages != 1)
+                {
+                    <a id="PreviousPage" class="btn btn-link sortme" asp-controller="Bags" asp-action="Index" 
+                       asp-route-sortorder="@ViewBag.SortOrder"
+                       asp-route-whichpage="@(ViewBag.WhichPage - 1)">Previous @ViewBag.PerPage Bags</a>
+                }
+                -
+                @if (ViewBag.WhichPage != ViewBag.NumPages && ViewBag.NumPages != 1)
+                {
+                    <a id="NextPage" class="btn btn-link sortme" asp-controller="Bags" asp-action="Index" 
+                       asp-route-sortorder="@ViewBag.SortOrder"
+                       asp-route-whichpage="@(ViewBag.WhichPage + 1)">Next @ViewBag.PerPage Bags</a>
+                }
+            </h5>
+
         }
-        <h5>
-            @(x.Year != null ? "Approximate Year: " + x.Year + ", " : "")
-            @(x.ObtainedFrom != null ? "Originally Obtained From: " + x.ObtainedFrom + ", " : "")
-            @Html.Raw(x.Detail)
-        </h5>
-        <hr />
-
-    }
-
-    <h5>
-        @if (ViewBag.WhichPage != 1 && ViewBag.NumPages != 1)
-        {
-            <a class="btn btn-link" asp-controller="Bags" asp-action="Index" asp-route-sortorder="@ViewBag.SortOrder"
-               asp-route-whichpage="@(ViewBag.WhichPage - 1)">Previous @ViewBag.PerPage Bags</a>
-        }
-        -
-        @if (ViewBag.WhichPage != ViewBag.NumPages && ViewBag.NumPages != 1)
-        {
-            <a class="btn btn-link" asp-controller="Bags" asp-action="Index" asp-route-sortorder="@ViewBag.SortOrder"
-               asp-route-whichpage="@(ViewBag.WhichPage + 1)">Next @ViewBag.PerPage Bags</a>
-        }
-    </h5>
-
-}
 
 
-@*@functions {
+        @*@functions {
 
-        *** Moved to BagContext.cs
+                *** Moved to BagContext.cs
 
-    }*@
+            }*@

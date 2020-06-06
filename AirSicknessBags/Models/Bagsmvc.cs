@@ -34,8 +34,11 @@ namespace AirSicknessBags.Models
         public string BottomFileName { get; set; }
         [Column(TypeName = "varchar(255)")]
         public string BagType { get; set; }
-        [Column(TypeName = "varchar(255)")]
-        public string ObtainedFrom { get; set; }
+        //[Column(TypeName = "varchar(255)")]
+        //public string ObtainedFrom { get; set; }
+        //[ForeignKey("PersonNumber")]
+        //[Column(TypeName = "int(11)")]
+        //public int? ObtainedFromPerson { get; set; }
         [Column(TypeName = "int(11)")]
         public int? NumberOfSwaps { get; set; } = 0;
         [Column(TypeName = "int(11)")]
@@ -48,6 +51,9 @@ namespace AirSicknessBags.Models
         [Column(TypeName = "longtext")]
         [Display(Name = "Pithy Description")]
         public string Detail { get; set; }
+
+        public int? PersonID { get; set; } // Only 1 person obtained from
+        public Peoplemvc Person { get; set; } // This is the person bag was obtained from 
 
         public ICollection<Linksmvccore> Links { get; set; }
     }

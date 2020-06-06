@@ -1,11 +1,25 @@
 ﻿<script src="~/js/Custom.js"></script>
 
-<span style="display:none" id="confirmSpan_@Model.Id">
-    Delete bag #@Model.Id : @Model.Airline ?
+@{
+    int identifier = 0;
+    string item = "";
+    @if (ViewData["Controller"].ToString() == "Bags")
+    {
+        identifier = Model.Id;
+        item = Model.Airline;
+    }
+    @if (ViewData["Controller"].ToString() == "People")
+    {
+        identifier = Model.PersonNumber;
+        item = Model.LastName;
+    }
+}
+<span style="display:none" id="confirmSpan_@identifier">
+    Delete item #@identifier: @item  ?
     @* WORKS <input class="btn btn-info btn-danger" asp-controller="Bags" asp-action="Delete" type="submit" value="Delete"
         onclick="return confirm('Delete bag #@Model.Id : @Model.Airline ?' )" />*@
 
-    <input class="btn btn-info btn-danger" asp-controller="@ViewData["Controller"]" asp-action="Delete" asp-route-id="@Model.Id" type="submit" value="Yes" />
-    <input type="button" class="btn btn-info btn-primary" value="No" onclick="confirmDelete('@Model.Id')" />
+    <input class="btn btn-info btn-danger" asp-controller="@ViewData["Controller"]" asp-action="Delete" asp-route-id="@identifier" type="submit" value="Yes" />
+    <input type="button" class="btn btn-info btn-primary" value="No" onclick="confirmDelete('@identifier')" />
 </span>
-<input type="button" id="deleteSpan_@Model.Id" class="btn btn-info btn-danger" value="Delete" onclick="confirmDelete('@Model.Id')" />
+<input type="button" id="deleteSpan_@identifier" class="btn btn-info btn-danger" value="Delete" onclick="confirmDelete('@identifier')" />

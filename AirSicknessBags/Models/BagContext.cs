@@ -27,17 +27,24 @@ namespace AirSicknessBags.Models
         public virtual DbSet<Peoplemvc> People { get; set; }
         public virtual DbSet<Bagtypes> Types { get; set; }
         public virtual DbSet<Country> Countries { get; set; }
-        public virtual DbSet<Duh> Duh { get; set; }
+//        public virtual DbSet<Duh> Duh { get; set; }
 
         public class BagViewModel
         {
             public Bagsmvc Bag { get; set; }
+            public List<Peoplemvc> People { get; set; }
             public List<Bagtypes> TypeOfBag { get; set; }
         }
 
         public class PeopleViewModel
         {
             public List<Peoplemvc> People{ get; set; }
+            public List<Country> Countries { get; set; }
+        }
+
+        public class PersonViewModel
+        {
+            public Peoplemvc Person { get; set; }
             public List<Country> Countries { get; set; }
         }
 
@@ -52,8 +59,21 @@ namespace AirSicknessBags.Models
         public class AllLinkViewModel
         {
             public Bagsmvc Bag { get; set; }
+            public Peoplemvc Person { get; set; }
+            public Linksmvccore Link { get; set; }
             public List<Peoplemvc> People { get; set; }
+            public List<Bagsmvc> Bags{ get; set; }
             public List<Linksmvccore> Links { get; set; }
+
+            public AllLinkViewModel()
+            {
+                Bag = new Bagsmvc();
+                Person = new Peoplemvc();
+                Link = new Linksmvccore();
+                People = new List<Peoplemvc>();
+                Bags = new List<Bagsmvc>();
+                Links = new List<Linksmvccore>();
+            }
         }
 
         public class Patron
@@ -62,13 +82,13 @@ namespace AirSicknessBags.Models
             public List<Bagsmvc> Bags { get; set; }
         }
 
-        public static string DisplayImage(string bagname)
+        public static string DisplayImage(string bagname, int width = 100)
         {
             if (bagname != null)
             {
                 string img = "http://www.airsicknessbags.com/components/com_airsicknessbag/images/" + bagname + ".jpg";
-                string result = "<a href=" + img + " target=\"_blank\">";
-                result += "<span><img class=\"border border-primary border-width:8px\" src=" + img + " style=\"width: 150px\" />";
+                string result = "<a href=" + img + " target=\"_blank\" title=\"Click on image to supersize\"> ";
+                result += "<span><img class=\"border border-primary border-width:8px\" src=" + img + " style=\"width: " + width + "px\" />";
                 result += "</a></span>";
                 return (result);
             }
@@ -137,9 +157,12 @@ namespace AirSicknessBags.Models
 
                 entity.Property(e => e.Lost).HasDefaultValueSql("'0'");
 
-                entity.Property(e => e.ObtainedFrom)
-                    .HasCharSet("utf8")
-                    .HasCollation("utf8_general_ci");
+                //entity.Property(e => e.ObtainedFromPerson)
+                //    .HasCharSet("utf8")
+                //    .HasCollation("utf8_general_ci");
+
+                entity.Property(e => e.PersonID)
+                    .HasColumnName("PersonID");
 
                 entity.Property(e => e.TextColor)
                     .HasCharSet("utf8")
@@ -149,6 +172,7 @@ namespace AirSicknessBags.Models
                     .HasCharSet("utf8")
                     .HasCollation("utf8_general_ci");
 
+//                entity.HasForeignKey(a => a.ObtainedFromPerson);
 //                entity.Property(e => e.Links).HasColumnName("BagID");
             });
 
@@ -161,29 +185,29 @@ namespace AirSicknessBags.Models
                     .HasName("LinkNumber")
                     .IsUnique();
 
-                entity.Property(e => e.BackFileName)
-                    .HasCharSet("utf8")
-                    .HasCollation("utf8_general_ci");
+                //entity.Property(e => e.BackFileName)
+                //    .HasCharSet("utf8")
+                //    .HasCollation("utf8_general_ci");
 
-                entity.Property(e => e.BottomFileName)
-                    .HasCharSet("utf8")
-                    .HasCollation("utf8_general_ci");
+                //entity.Property(e => e.BottomFileName)
+                //    .HasCharSet("utf8")
+                //    .HasCollation("utf8_general_ci");
 
-                entity.Property(e => e.FirstName)
-                    .HasCharSet("utf8")
-                    .HasCollation("utf8_general_ci");
+                //entity.Property(e => e.FrontFileName)
+                //    .HasCharSet("utf8")
+                //    .HasCollation("utf8_general_ci");
 
-                entity.Property(e => e.FrontFileName)
-                    .HasCharSet("utf8")
-                    .HasCollation("utf8_general_ci");
+                //entity.Property(e => e.FirstName)
+                //    .HasCharSet("utf8")
+                //    .HasCollation("utf8_general_ci");
 
-                entity.Property(e => e.LastName)
-                    .HasCharSet("utf8")
-                    .HasCollation("utf8_general_ci");
+                //entity.Property(e => e.LastName)
+                //    .HasCharSet("utf8")
+                //    .HasCollation("utf8_general_ci");
 
-                entity.Property(e => e.MiddleName)
-                    .HasCharSet("utf8")
-                    .HasCollation("utf8_general_ci");
+                //entity.Property(e => e.MiddleName)
+                //    .HasCharSet("utf8")
+                //    .HasCollation("utf8_general_ci");
             });
 
             modelBuilder.Entity<Peoplemvc>(entity =>
@@ -199,9 +223,9 @@ namespace AirSicknessBags.Models
                     .HasCharSet("utf8")
                     .HasCollation("utf8_general_ci");
 
-                entity.Property(e => e.Country)
-                    .HasCharSet("utf8")
-                    .HasCollation("utf8_general_ci");
+                //entity.Property(e => e.Country)
+                //    .HasCharSet("utf8")
+                //    .HasCollation("utf8_general_ci");
 
                 entity.Property(e => e.FirstName)
                     .HasCharSet("utf8")

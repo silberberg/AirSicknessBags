@@ -1,107 +1,104 @@
-﻿@model AirSicknessBags.Models.Peoplemvc
+﻿@model BagContext.PersonViewModel
+@*@model AirSicknessBags.Models.Peoplemvc*@
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = ViewBag.PageType;
 }
 
-<h1>Edit</h1>
+    <h1>@ViewBag.PageType</h1>
 
-<h4>Edit People</h4>
+    <h4>@ViewBag.PageType People</h4>
 <hr />
 <div class="row">
-    <div class="col-md-4">
+    <div class="col-sm-12">
         <form asp-action="Edit">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="PersonNumber" />
+            <input type="hidden" asp-for="Person.PersonNumber" />
             <div class="form-group">
-                <label asp-for="PrimarySiteName" class="control-label"></label>
-                <input asp-for="PrimarySiteName" class="form-control" />
-                <span asp-validation-for="PrimarySiteName" class="text-danger"></span>
+                <label asp-for="Person.PrimarySiteName" class="control-label"></label>
+                <input asp-for="Person.PrimarySiteName" class="form-control" />
+                <span asp-validation-for="Person.PrimarySiteName" class="text-danger"></span>
+                <label asp-for="Person.PrimarySite" class="control-label"></label>
+                <input asp-for="Person.PrimarySite" class="form-control" />
+                <span asp-validation-for="Person.PrimarySite" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="SecondarySiteName" class="control-label"></label>
-                <input asp-for="SecondarySiteName" class="form-control" />
-                <span asp-validation-for="SecondarySiteName" class="text-danger"></span>
+                <label asp-for="Person.SecondarySiteName" class="control-label"></label>
+                <input asp-for="Person.SecondarySiteName" class="form-control" />
+                <span asp-validation-for="Person.SecondarySiteName" class="text-danger"></span>
+                <label asp-for="Person.SecondarySite" class="control-label"></label>
+                <input asp-for="Person.SecondarySite" class="form-control" />
+                <span asp-validation-for="Person.SecondarySite" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="PrimarySite" class="control-label"></label>
-                <input asp-for="PrimarySite" class="form-control" />
-                <span asp-validation-for="PrimarySite" class="text-danger"></span>
+                <label asp-for="Person.FirstName" class="control-label"></label>
+                <input asp-for="Person.FirstName" class="form-control" />
+                <span asp-validation-for="Person.FirstName" class="text-danger"></span>
+                <label asp-for="Person.MiddleName" class="control-label"></label>
+                <input asp-for="Person.MiddleName" class="form-control" />
+                <span asp-validation-for="Person.MiddleName" class="text-danger"></span>
+                <label asp-for="Person.LastName" class="control-label"></label>
+                <input asp-for="Person.LastName" class="form-control" />
+                <span asp-validation-for="Person.LastName" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="SecondarySite" class="control-label"></label>
-                <input asp-for="SecondarySite" class="form-control" />
-                <span asp-validation-for="SecondarySite" class="text-danger"></span>
+                <label asp-for="Person.IsoCountry" class="control-label"></label>
+                <select asp-for="Person.IsoCountry" class="form-control w-auto">
+                    <option value="">Any</option>
+                    @foreach (var ctry in Model.Countries)
+                    {
+                        @if (ctry.Iso == Model.Person.IsoCountry)
+                        {
+                            <option value="@ctry.Iso" selected>@ctry.Name</option>
+                        }
+                        else
+                        {
+                            <option value="@ctry.Iso">@ctry.Name</option>
+                        }
+                    }
+                </select>
             </div>
             <div class="form-group">
-                <label asp-for="FirstName" class="control-label"></label>
-                <input asp-for="FirstName" class="form-control" />
-                <span asp-validation-for="FirstName" class="text-danger"></span>
+                <label asp-for="Person.PrimaryEmail" class="control-label"></label>
+                <input asp-for="Person.PrimaryEmail" class="form-control" />
+                <span asp-validation-for="Person.PrimaryEmail" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="MiddleName" class="control-label"></label>
-                <input asp-for="MiddleName" class="form-control" />
-                <span asp-validation-for="MiddleName" class="text-danger"></span>
+                <label asp-for="Person.SecondaryEmail" class="control-label"></label>
+                <input asp-for="Person.SecondaryEmail" class="form-control" />
+                <span asp-validation-for="Person.SecondaryEmail" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="LastName" class="control-label"></label>
-                <input asp-for="LastName" class="form-control" />
-                <span asp-validation-for="LastName" class="text-danger"></span>
+                <label asp-for="Person.TertiaryEmail" class="control-label"></label>
+                <input asp-for="Person.TertiaryEmail" class="form-control" />
+                <span asp-validation-for="Person.TertiaryEmail" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Country" class="control-label"></label>
-                <input asp-for="Country" class="form-control" />
-                <span asp-validation-for="Country" class="text-danger"></span>
+                <label asp-for="Person.Collector" class="control-label"></label>
+                <input type="hidden" asp-for="Person.Collector" class="form-control w-25" />
+                <input type="checkbox" @if (Model.Person.Collector == 1) { <text> checked</text> }
+                       onchange="ToggleCheckbox('Person_Collector');" />
+                <label asp-for="Person.Donor" class="control-label"></label>
+                <input type="hidden" asp-for="Person.Donor" class="form-control w-25" />
+                <input type="checkbox" @if (Model.Person.Donor == 1) { <text> checked</text> }
+                       onchange="ToggleCheckbox('Person_Donor');" />
+                <label asp-for="Person.Swapper" class="control-label"></label>
+                <input type="hidden" asp-for="Person.Swapper" class="form-control w-25" />
+                <input type="checkbox" @if (Model.Person.Swapper == 1) { <text> checked</text> }
+                       onchange="ToggleCheckbox('Person_Swapper');" />
+                <label asp-for="Person.Seller" class="control-label"></label>
+                <input type="hidden" asp-for="Person.Seller" class="form-control w-25" />
+                <input type="checkbox" @if (Model.Person.Seller == 1) { <text> checked</text> }
+                       onchange="ToggleCheckbox('Person_Seller');" />
+                <label asp-for="Person.StarterKit" class="control-label"></label>
+                <input type="hidden" asp-for="Person.StarterKit" class="form-control w-25" />
+                <input type="checkbox" @if (Model.Person.StarterKit == 1) { <text> checked</text> }
+                       onchange="ToggleCheckbox('Person_StarterKit');" />
             </div>
             <div class="form-group">
-                <label asp-for="IsoCountry" class="control-label"></label>
-                <input asp-for="IsoCountry" class="form-control" />
-                <span asp-validation-for="IsoCountry" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="PrimaryEmail" class="control-label"></label>
-                <input asp-for="PrimaryEmail" class="form-control" />
-                <span asp-validation-for="PrimaryEmail" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="SecondaryEmail" class="control-label"></label>
-                <input asp-for="SecondaryEmail" class="form-control" />
-                <span asp-validation-for="SecondaryEmail" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="TertiaryEmail" class="control-label"></label>
-                <input asp-for="TertiaryEmail" class="form-control" />
-                <span asp-validation-for="TertiaryEmail" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Collector" class="control-label"></label>
-                <input asp-for="Collector" class="form-control" />
-                <span asp-validation-for="Collector" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Donor" class="control-label"></label>
-                <input asp-for="Donor" class="form-control" />
-                <span asp-validation-for="Donor" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Swapper" class="control-label"></label>
-                <input asp-for="Swapper" class="form-control" />
-                <span asp-validation-for="Swapper" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Seller" class="control-label"></label>
-                <input asp-for="Seller" class="form-control" />
-                <span asp-validation-for="Seller" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="StarterKit" class="control-label"></label>
-                <input asp-for="StarterKit" class="form-control" />
-                <span asp-validation-for="StarterKit" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Comments" class="control-label"></label>
-                <input asp-for="Comments" class="form-control" />
-                <span asp-validation-for="Comments" class="text-danger"></span>
+                <label asp-for="Person.Comments" class="control-label"></label>
+                <textarea asp-for="Person.Comments" class="form-control"></textarea>
+                <span asp-validation-for="Person.Comments" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />
@@ -111,6 +108,6 @@
 </div>
 
 <div>
-    <a asp-action="Index">Back to List</a>
+    <a asp-controller="People" asp-action="Index">Back to List</a>
 </div>
 

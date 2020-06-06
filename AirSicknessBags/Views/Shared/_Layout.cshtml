@@ -33,6 +33,9 @@
                         @if (signInManager.IsSignedIn(User))
                         {
                             <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Links" asp-action="Index">Links</a>
+                            </li>
+                            <li class="nav-item">
                                 <form method="post" asp-area="" asp-controller="Account" asp-action="Logout">
                                     <button type="submit" class="nav-link btn btn-link py-0" style="width:auto">
                                         Logout @User.Identity.Name
@@ -41,20 +44,20 @@
                             </li>
                         }
                         @*/* Never show Register or Login pages
-                        else
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Register">Register</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Login">Login</a>
-                            </li>
-                        }*@
-                    
+        else
+        {
+            <li class="nav-item">
+                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Register">Register</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Login">Login</a>
+            </li>
+        }*@
+
                         @*Privacy is in the footer, boot it from the header
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>*@
+        <li class="nav-item">
+            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+        </li>*@
                     </ul>
                 </div>
                 @*Google Sign-in is superfluous, but left here if ever necessary

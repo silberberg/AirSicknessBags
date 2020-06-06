@@ -8,6 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using AirSicknessBags.Models;
 using static AirSicknessBags.Models.BagContext;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Authorization;
+using System.ComponentModel.DataAnnotations;
 
 namespace AirSicknessBags.Controllers
 {
@@ -34,17 +36,13 @@ namespace AirSicknessBags.Controllers
 
             alvm.Links = await _cache.GetFromTable(_context.Links);
             alvm.People = await _cache.GetFromTable(_context.People);
-            
-            //            await Tables.GetLinks(_context);
-            //            alvm.Links = Tables._alllinks;
-            //await Tables.GetPeople(_context);
-            //alvm.People = Tables._allpeople;
-            
+            alvm.Bags = await _cache.GetFromTable(_context.Bags);
+
+            alvm.Links = alvm.Links.OrderByDescending(x => x.LinkNumber).Take(10).ToList();
             return View(alvm);
         }
 
-        // GET: Links/Details/5
-        // Display all bags for a particular person
+        // GET: Links/Details/5 - Display all bags for a particular person
         [HttpGet]
         public async Task<IActionResult> Details(int? id)
         {
@@ -53,25 +51,24 @@ namespace AirSicknessBags.Controllers
                 return NotFound();
             }
 
-            var dude = await _cache.GetFromTable(_context.People) as List<Peoplemvc>;
+            // Fetch all people and bags (like always)
+            var people = await _cache.GetFromTable(_context.People) as List<Peoplemvc>;
+            var allbags = await _cache.GetFromTable(_context.Bags);
+
+
+            // A Patron instance contains a person and their bags
             // Instantiate patron with the person the user clicked as well as a blank list of bags
             Patron patron = new Patron
             {
-                //                Person = await _context.People.FindAsync(id),
-                Person = dude.FirstOrDefault(x => x.PersonNumber == id),
+                Person = people.FirstOrDefault(x => x.PersonNumber == id),
                 Bags = new List<Bagsmvc>()
             };
 
-            // Find all links for this person
-            //            var links = await _context.Links.Where(x => x.PersonId == id).ToListAsync();
-            var alllinks = await _cache.GetFromTable(_context.Links);
-            var links = alllinks.Where(x => x.PersonId == id).ToList();
-
-            // Get the full list of bags
-            var allbags = await _cache.GetFromTable(_context.Bags);
-            //await Tables.GetBags(_context);
-            //var allbags = Tables._allbags;
-            // var bags = await _context.Bags.ToListAsync();
+            // Slightly faster way to find all links for the person using Navigation Properties
+            var links = patron.Person.Links;
+            // Find all links for this person -  THIS WORKS!!
+            //var alllinks = await _cache.GetFromTable(_context.Links);
+            //var links = alllinks.Where(x => x.PersonId == id).ToList();
 
             // When someone clicks "See this person's bags", but they haven't sent me any (such as Starter Kit people), put in dummy record
             if (links == null)
@@ -90,6 +87,9 @@ namespace AirSicknessBags.Controllers
                     if (x != null)
                     {
                         patron.Bags.Add(x);
+                    } else
+                    {
+                        throw new FieldAccessException  ("Link to non-existent bag, Link #" + l.LinkNumber);
                     }
                 }
             }
@@ -98,6 +98,9 @@ namespace AirSicknessBags.Controllers
         }
 
         // GET: Links/Create
+        // In order to create a link, I am arbitrarily deciding that you must first select the bag and then match it up
+        // to a person.  That's why a bag id must be passed to this method
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> Create(int? id)
         {
@@ -112,14 +115,9 @@ namespace AirSicknessBags.Controllers
             // Load up the bag
             var allbags = await _cache.GetFromTable(_context.Bags);
             lvm.Bag = allbags.FirstOrDefault(x => x.Id == id);
-            //            await Tables.GetBags(_context);
-            //            lvm.Bag = Tables._allbags.FirstOrDefault(x => x.Id == id);
-            //            lvm.Bag = await _context.Bags.FirstOrDefaultAsync(x => x.Id == id);
 
             // Get the full list of people
             lvm.People = await _cache.GetFromTable(_context.People);
-            //await Tables.GetPeople(_context);
-            //lvm.People = Tables._allpeople;
 
             // The link is for this bag
             lvm.Link = new Linksmvccore();
@@ -139,6 +137,7 @@ namespace AirSicknessBags.Controllers
         // POST: Links/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to, for 
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("LinkNumber,BagId,PersonId")] Linksmvccore linksmvccore)
@@ -147,21 +146,15 @@ namespace AirSicknessBags.Controllers
             {
                 // Need to get links in order to update the list in memory
                 var alllinks = await _cache.GetFromTable(_context.Links);
-                // await Tables.GetLinks(_context);
-                // await Tables.GetFromTable(_context.Links, _context);
 
-                // This is a live database update
+                // Prepare the database update
                 _context.Links.Add(linksmvccore);
+
+                // Perform the update
                 await _context.SaveChangesAsync();
 
                 // Have to refresh the cache
                 await _cache.GetFromTable(true, _context.Links);
-
-                // Have to add this link to the cache
-                // await _cache.AddItem(linksmvccore, _context.Links);
-                // Linksmvccore createdlink = UpdateZeroLinkNumber(linksmvccore, alllinks);
-                // await _cache.AddItem(createdlink, _context.Links);
-                // Tables._alllinks.Add(createdlink); 
 
                 // Go back to the bag controller to display just this bag
                 return RedirectToAction("Index", "Bags", new { id = linksmvccore.BagId });
@@ -186,6 +179,8 @@ namespace AirSicknessBags.Controllers
         }
 
         // GET: Links/Edit/5
+        [Authorize]
+        [HttpGet]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -193,26 +188,32 @@ namespace AirSicknessBags.Controllers
                 return NotFound();
             }
 
-            var alllinks = await _cache.GetFromTable(_context.Links);
-            var linksmvccore = alllinks.Find(x => x.BagId == id);
-            // var linksmvccore = await _context.Links.FindAsync(id);
-            // var linksmvccore =  Tables._alllinks.Find(x => x.BagId == id);
+            var alvm = new AllLinkViewModel();
 
-            if (linksmvccore == null)
+            // Get all the links then find the one to edit
+            alvm.Links = await _cache.GetFromTable(_context.Links);
+            alvm.Link = alvm.Links.FirstOrDefault(x => x.LinkNumber == id);
+            alvm.People = await _cache.GetFromTable(_context.People);
+            alvm.Person = alvm.People.FirstOrDefault(x => x.PersonNumber == alvm.Link.PersonId);
+            alvm.Bags = await _cache.GetFromTable(_context.Bags);
+            alvm.Bag = alvm.Bags.FirstOrDefault(x => x.Id == alvm.Link.BagId);
+
+            if (alvm.Link == null)
             {
                 return NotFound();
             }
-            return View(linksmvccore);
+            return View(alvm);
         }
 
         // POST: Links/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to, for 
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("LinkNumber,BagId,PersonId")] Linksmvccore linksmvccore)
+        public async Task<IActionResult> Edit(int id, [Bind("Link")] AllLinkViewModel alvm)
         {
-            if (id != linksmvccore.LinkNumber)
+            if (id != alvm.Link.LinkNumber)
             {
                 return NotFound();
             }
@@ -221,36 +222,33 @@ namespace AirSicknessBags.Controllers
             {
                 try
                 {
-                    _context.Update(linksmvccore);
+                    _context.Update(alvm.Link);
                     await _context.SaveChangesAsync();
 
                     // I have no idea how to update the cache, so the hell with it, just refresh it completely.
                     await _cache.GetFromTable(true, _context.Links);
-
-                    //Tables._alllinks.FindAll(x => x.LinkNumber == id)
-                    //    .ForEach(y => {
-                    //        y.BagId = linksmvccore.BagId;
-                    //        y.PersonId = linksmvccore.PersonId;
-                    //        });
-
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!LinksmvccoreExists(linksmvccore.LinkNumber))
+                    if (!LinksmvccoreExists(alvm.Link.LinkNumber))
                     {
                         return NotFound();
                     }
                     else
                     {
-                        throw;
+                        throw new Exception ("Could not save link #" + alvm.Link.LinkNumber + " but I have no idea why");
                     }
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(linksmvccore);
+            // This probably won't work because the binding omits people and bags.  Actually, the code shouldn't even get here
+            return View(alvm);
         }
 
         // GET: Links/Delete/5
+        // I suppose this might be useful, but there never seems to be a reason to delete a link
+        [Authorize]
+        [HttpGet]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -258,19 +256,29 @@ namespace AirSicknessBags.Controllers
                 return NotFound();
             }
 
-            // Get all the links and find the one to delete
-            var alllinks = await _cache.GetFromTable(_context.Links);
-            var linksmvccore = alllinks.FirstOrDefault(m => m.LinkNumber == id);
+            var alvm = new AllLinkViewModel();
 
-            if (linksmvccore == null)
+            // Get all the links and find the one to delete
+            alvm.Links  = await _cache.GetFromTable(_context.Links);
+            alvm.Link = alvm.Links.FirstOrDefault(m => m.LinkNumber == id);
+
+            // Find the Person and Bag this link links
+            alvm.People = await _cache.GetFromTable(_context.People);
+            alvm.Person = alvm.People.FirstOrDefault(x => x.PersonNumber == alvm.Link.PersonId);
+            alvm.Bags = await _cache.GetFromTable(_context.Bags);
+            alvm.Bag = alvm.Bags.FirstOrDefault(x => x.Id == alvm.Link.BagId);
+
+            if (alvm.Link == null || alvm.Bag == null || alvm.Person == null)
             {
-                return NotFound();
+                return NotFound("Invalid link: Link #" + alvm.Link.LinkNumber + " Person:" + alvm.Person.PersonNumber +
+                    " Bag:" + alvm.Bag.Id);
             }
 
-            return View(linksmvccore);
+            return View(alvm);
         }
 
         // POST: Links/Delete/5
+        [Authorize]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
@@ -286,7 +294,6 @@ namespace AirSicknessBags.Controllers
             // I have no idea how to delete an item from the cache, so the hell with it, just refresh it completely.
             await _cache.GetFromTable(true, _context.Links);
 
-            //Tables._alllinks.Remove(linksmvccore);
             return RedirectToAction(nameof(Index));
         }
 

@@ -195,10 +195,10 @@ namespace AirSicknessBags.Migrations
                         .HasAnnotation("MySql:CharSet", "utf8")
                         .HasAnnotation("MySql:Collation", "utf8_general_ci");
 
-                    b.Property<string>("MiddleName")
-                        .HasColumnType("varchar(45)")
-                        .HasAnnotation("MySql:CharSet", "utf8")
-                        .HasAnnotation("MySql:Collation", "utf8_general_ci");
+                    //b.Property<string>("MiddleName")
+                    //    .HasColumnType("varchar(45)")
+                    //    .HasAnnotation("MySql:CharSet", "utf8")
+                    //    .HasAnnotation("MySql:Collation", "utf8_general_ci");
 
                     b.Property<int?>("PersonId")
                         .HasColumnName("PersonID")

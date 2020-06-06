@@ -15,9 +15,9 @@
         <h1>ID: @Model.Bag.Id</h1>
         <div>
             @*@if (ViewBag.Operation != "Recently Copied")
-            {
-                <input type="hidden" asp-for="@Model.Bag.Id" />
-            }*@
+        {
+            <input type="hidden" asp-for="@Model.Bag.Id" />
+        }*@
             <input type="hidden" asp-for="@Model.Bag.Id" />
             <span asp-validation-for="@Model.Bag.Airline" class="text-danger"></span>
             <label asp-for="@Model.Bag.Airline"></label>
@@ -53,8 +53,23 @@
             }
 
             <input asp-for="@Model.Bag.BagType" />
-            <label asp-for="@Model.Bag.ObtainedFrom"></label>
-            <input asp-for="@Model.Bag.ObtainedFrom" />
+            <label asp-for="@Model.Bag.PersonID"></label>
+            <input asp-for="@Model.Bag.PersonID" />
+
+            <select id="Dude" name="Dude">
+                @foreach (var person in Model.People)
+                {
+                    @if (person.PersonNumber == Model.Bag.PersonID)
+                    {
+                        <option value="@person.PersonNumber" selected>@person.FirstName @person.MiddleName @person.LastName</option>
+                    }
+                    else
+                    {
+                        <option value="@person.PersonNumber">@person.FirstName @person.MiddleName @person.LastName</option>
+                    }
+                }
+            </select>
+
             <label asp-for="@Model.Bag.NumberOfSwaps"></label>
             <input asp-for="@Model.Bag.NumberOfSwaps" />
             <label asp-for="@Model.Bag.DateSwapAdded"></label>

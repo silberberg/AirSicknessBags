@@ -10,6 +10,7 @@ using static AirSicknessBags.Models.BagContext;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Http;
 using System.Security.Cryptography.X509Certificates;
+using Microsoft.AspNetCore.Authorization;
 
 namespace AirSicknessBags.Controllers
 {
@@ -60,7 +61,7 @@ namespace AirSicknessBags.Controllers
         public static List<Peoplemvc> Allpeople { get; set; } = null;
         public virtual List<Peoplemvc> AllPeople => Allpeople;
 
-        // Get all the people, hopefully just once
+        // Get all the people, hopefully just once (but right now it remains unused since it's not cache friendly)
         public async Task<List<Peoplemvc>> GetAllPeople()
         {
             if (Allpeople == null)
@@ -80,22 +81,7 @@ namespace AirSicknessBags.Controllers
 
             // Get all people from the cache
             var allpeople = await _cache.GetFromTable(_context.People);
-            //            _context.Entry<Peoplemvc>(allpeople[5]).Collection(b => b.Links).Load();
-            
             // List<Peoplemvc> ap = await _context.People.Include(x => x.Links).ToListAsync();
-
-            // Now we have to populate the stupid navigation property: ICollection<Linksmvccore> Links
-            //foreach (var person in allpeople)
-            //{
-            //    var alllinks = await _cache.GetFromTable(_context.Links);
-            //    links = alllinks.ToList();
-            //    links.RemoveAll(x => x.PersonId != person.PersonNumber);
-            //    if (links.Count > 0)
-            //    {
-            //        person.Links = links;
-            //    }
-            //}
-            //var peoplewithlinks = allpeople.Where(x => alllinks.Any(y => x.PersonNumber == y.PersonId));
 
             // Here's a placeholder person for when nobody fits search criteria
             Peoplemvc emptyperson = new Peoplemvc
@@ -178,7 +164,7 @@ namespace AirSicknessBags.Controllers
                 if (FormData["PersonName"] != "")
                 {
                     peoplemvc = peoplemvc
-                   .Where(x =>
+                        .Where(x =>
                         (x.FirstName != null && x.FirstName.Contains(FormData["PersonName"], StringComparison.OrdinalIgnoreCase)) ||
                         (x.MiddleName != null && x.MiddleName.Contains(FormData["PersonName"], StringComparison.OrdinalIgnoreCase)) ||
                         (x.LastName != null && x.LastName.Contains(FormData["PersonName"], StringComparison.OrdinalIgnoreCase))
@@ -203,7 +189,6 @@ namespace AirSicknessBags.Controllers
         public async Task<IActionResult> Index(int? whichpage, int? perpage, int? numpages)
         {
             PeopleViewModel pvm = new PeopleViewModel();
-
              
             int WhichPage = whichpage ?? 1;
             int NumPages = numpages ?? 0;
@@ -220,37 +205,9 @@ namespace AirSicknessBags.Controllers
             return View(pvm);
         }
 
-        //private List<Peoplemvc> CreatePagination(List<Peoplemvc> people)
-        //{
-        //    if (people != null)
-        //    {
-        //        double stupid = Convert.ToDouble(people.Count) / PerPage;
-        //        NumPages = Convert.ToInt32(Math.Ceiling(stupid));
-        //        ViewBag.NumPages = NumPages;
-        //        return (people.GetRange((WhichPage - 1) * PerPage, Math.Min(PerPage, people.Count - ((WhichPage - 1) * PerPage))));
-        //    } else
-        //    {
-        //        return (null);
-        //    }
-        //}
-
-        //public List<T> CreatePagination<T>(List<T> items, int whichpage, int perpage, ref int numpages)
-        //{
-        //    if (items != null)
-        //    {
-        //        double stupid = Convert.ToDouble(items.Count) / perpage;
-        //        numpages = Convert.ToInt32(Math.Ceiling(stupid));
-        //        return (items.GetRange((whichpage - 1) * perpage, Math.Min(perpage, items.Count - ((whichpage - 1) * perpage))));
-        //    }
-        //    else
-        //    {
-        //        return (null);
-        //    }
-        //}
-
         // POST: People
         [HttpPost]
-        public async Task<IActionResult> Index(int? id)
+        public async Task<IActionResult> Index(int? id, int? whichpage, int? perpage, int? numpages)
         {
             // Save the request for pagination
             if (Request.Form != null)
@@ -258,9 +215,9 @@ namespace AirSicknessBags.Controllers
                 FormData = Request.Form;
             }
 
-            int WhichPage = 1;
-            int NumPages = 0;
-            int PerPage = 5;
+            int WhichPage = whichpage ?? 1;
+            int NumPages = numpages ?? 0;
+            int PerPage = perpage ?? 5;
 
             // View Model will have both people and country list
             PeopleViewModel pvm = new PeopleViewModel();
@@ -287,19 +244,17 @@ namespace AirSicknessBags.Controllers
         [HttpGet]
         public async Task<IActionResult> Details(int? id)
         {
-            // Get all people
-            var allpeople = await _cache.GetFromTable(_context.People);
-
             Peoplemvc person = new Peoplemvc();
 
             if (id == null)
             {
                 return NotFound();
-            } else
-            {
-                person = allpeople.FirstOrDefault(m => m.PersonNumber == id);
             }
 
+            // Get all people, then get the person that matches id
+            var allpeople = await _cache.GetFromTable(_context.People);
+            person = allpeople.FirstOrDefault(m => m.PersonNumber == id);
+            
             if (person == null)
             {
                 return NotFound();
@@ -309,6 +264,8 @@ namespace AirSicknessBags.Controllers
         }
 
         // GET: People/Create
+        [Authorize]
+        [HttpGet]
         public IActionResult Create()
         {
             return View();
@@ -317,6 +274,7 @@ namespace AirSicknessBags.Controllers
         // POST: People/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to, for 
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("PersonNumber,PrimarySiteName,SecondarySiteName,PrimarySite,SecondarySite,FirstName,MiddleName,LastName,Country,IsoCountry,PrimaryEmail,SecondaryEmail,TertiaryEmail,Collector,Donor,Swapper,Seller,StarterKit,Comments")] Peoplemvc peoplemvc)
@@ -333,32 +291,44 @@ namespace AirSicknessBags.Controllers
         }
 
         // GET: People/Edit/5
+        [Authorize]
+        [HttpGet]
         public async Task<IActionResult> Edit(int? id)
         {
+            ViewBag.PageType = "Edit";
+
+            PersonViewModel pvm = new PersonViewModel();
+            pvm.Countries = await _cache.GetFromTable(_context.Countries);
+
             if (id == null)
             {
-                return NotFound();
+                pvm.Person = new Peoplemvc();
+                ViewBag.PageType = "Create";
+                return View(pvm);
             }
 
-            // Get all people
-            var allpeople = await _cache.GetFromTable(_context.People);
 
-            var peoplemvc = allpeople.FirstOrDefault(x => x.PersonNumber == id);
-            if (peoplemvc == null)
+            // Get all people, then get the person that matches id
+            var allpeople = await _cache.GetFromTable(_context.People);
+            pvm.Person = allpeople.FirstOrDefault(m => m.PersonNumber == id);
+
+            if (pvm.Person == null)
             {
                 return NotFound();
             }
-            return View(peoplemvc);
+            return View(pvm);
         }
 
         // POST: People/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to, for 
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("PersonNumber,PrimarySiteName,SecondarySiteName,PrimarySite,SecondarySite,FirstName,MiddleName,LastName,Country,IsoCountry,PrimaryEmail,SecondaryEmail,TertiaryEmail,Collector,Donor,Swapper,Seller,StarterKit,Comments")] Peoplemvc peoplemvc)
+//        public async Task<IActionResult> Edit(int id, [Bind("PersonNumber,PrimarySiteName,SecondarySiteName,PrimarySite,SecondarySite,FirstName,MiddleName,LastName,Country,IsoCountry,PrimaryEmail,SecondaryEmail,TertiaryEmail,Collector,Donor,Swapper,Seller,StarterKit,Comments")] Peoplemvc peoplemvc)
+        public async Task<IActionResult> Edit(int id, [Bind("Person,Countries")] PersonViewModel pvm)
         {
-            if (id != peoplemvc.PersonNumber)
+            if (id != pvm.Person.PersonNumber)
             {
                 return NotFound();
             }
@@ -367,7 +337,14 @@ namespace AirSicknessBags.Controllers
             {
                 try
                 {
-                    _context.Update(peoplemvc);
+                    if (id == 0) // Creating a new person
+                    {
+                        _context.Add(pvm.Person);
+                    }
+                    else
+                    {
+                        _context.Update(pvm.Person);
+                    }
                     await _context.SaveChangesAsync();
 
                     // Get refreshed people cache
@@ -375,7 +352,7 @@ namespace AirSicknessBags.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!PeoplemvcExists(peoplemvc.PersonNumber))
+                    if (!PeoplemvcExists(pvm.Person.PersonNumber))
                     {
                         return NotFound();
                     }
@@ -386,10 +363,12 @@ namespace AirSicknessBags.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(peoplemvc);
+            return View(pvm);
         }
 
         // GET: People/Delete/5
+        [Authorize]
+        [HttpGet]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -399,8 +378,8 @@ namespace AirSicknessBags.Controllers
 
             // Get all people
             var allpeople = await _cache.GetFromTable(_context.People);
-
             var peoplemvc = allpeople.FirstOrDefault(m => m.PersonNumber == id);
+
             if (peoplemvc == null)
             {
                 return NotFound();
@@ -410,6 +389,7 @@ namespace AirSicknessBags.Controllers
         }
 
         // POST: People/Delete/5
+        [Authorize]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)

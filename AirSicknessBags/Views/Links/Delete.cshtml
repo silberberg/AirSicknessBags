@@ -1,4 +1,4 @@
-﻿@model AirSicknessBags.Models.Linksmvccore
+﻿@model BagContext.AllLinkViewModel
 
 @{
     ViewData["Title"] = "Delete";
@@ -11,58 +11,58 @@
     <h4>Linksmvccore</h4>
     <hr />
     <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.BagId)
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Link.BagId)
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.BagId)
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Link.BagId)
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.PersonId)
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Link.PersonId)
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.PersonId)
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Link.PersonId)
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.FrontFileName)
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Bag.FrontFileName)
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.FrontFileName)
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Bag.FrontFileName)
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.BackFileName)
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Bag.BackFileName)
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.BackFileName)
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Bag.BackFileName)
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.BottomFileName)
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Bag.BottomFileName)
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.BottomFileName)
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Bag.BottomFileName)
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.FirstName)
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Person.FirstName)
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.FirstName)
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Person.FirstName)
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.MiddleName)
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Person.MiddleName)
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.MiddleName)
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Person.MiddleName)
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.LastName)
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Person.LastName)
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.LastName)
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Person.LastName)
         </dd>
     </dl>
     
     <form asp-action="Delete">
-        <input type="hidden" asp-for="LinkNumber" />
+        <input type="hidden" asp-for="Link.LinkNumber" />
         <input type="submit" value="Delete" class="btn btn-danger" /> |
         <a asp-action="Index">Back to List</a>
     </form>

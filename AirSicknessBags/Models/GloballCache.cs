@@ -59,6 +59,8 @@ namespace AirSicknessBags.Models
                 // We do this by seeing if there's an ICollection property that references the "many" table
                 PropertyInfo property = typeof(T1).GetProperties()
                     .FirstOrDefault(x => x.PropertyType.Name.Contains("ICollection"));
+                //List<PropertyInfo> properties = typeof(T1).GetProperties()
+                //    .Where(x => x.PropertyType.Name.Contains("ICollection")).ToList();
 
                 // If no Navigation Property is found, just read the table.  Otherwise read the table AND the related table
                 if (property == null)
@@ -66,7 +68,15 @@ namespace AirSicknessBags.Models
                     results = await TableToRead.ToListAsync() as List<T1>;
                 } else
                 {
-                    results = await TableToRead.Include(property.Name).ToListAsync() as List<T1>;
+                    if (cacheKey == "Bagsmvc")
+                    {
+                        results = await TableToRead.Include(property.Name).Include("Person").ToListAsync() as List<T1>;
+                    }
+                    else
+                    {
+                        results = await TableToRead.Include(property.Name).ToListAsync() as List<T1>;
+                    }
+                    //results = await TableToRead.Include("Person").ToListAsync() as List<T1>;
                 }
 
                 // Configure the cache

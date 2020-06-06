@@ -4,15 +4,15 @@
     ViewData["Title"] = "Air Sickness Bag Museum";
 }
 
-    <div class="text-center">
+    <div class="text-center bg-warning p-2">
         <h1 class="display-4">Welcome to the Air Sickness Bag Virtual Museum</h1>
         <h4>Serving your barf bag needs since 1997</h4>
-        <div class="container">
-            <p>Random Bag of The Day</p>
+        <div class="container bg-primary col-md-4 p-4">
+            <h4>Random Bag of The Day</h4>
             @Model.Airline- @Model.Id<br />
-            @Html.Raw(@BagContext.DisplayImage(Model.FrontFileName)) 
-            @Html.Raw(@BagContext.DisplayImage(Model.BackFileName)) 
-            @Html.Raw(@BagContext.DisplayImage(Model.BottomFileName))<br />
+            @Html.Raw(@BagContext.DisplayImage(Model.FrontFileName, 150)) 
+            @Html.Raw(@BagContext.DisplayImage(Model.BackFileName, 150)) 
+            @Html.Raw(@BagContext.DisplayImage(Model.BottomFileName, 150))<br />
         </div>
 
     </div>
