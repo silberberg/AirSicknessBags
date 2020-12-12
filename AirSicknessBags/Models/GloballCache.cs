@@ -27,7 +27,7 @@ namespace AirSicknessBags.Models
 
         private const int hours = 4;
 
-        string IGenericCacheService.getSecret => "I#am#Bree";
+        string IGenericCacheService.getSecret => "I#am#Kasia";
 
         public ComplexCacheService(BagContext context,
             ILogger<SimpleCacheService> logger,

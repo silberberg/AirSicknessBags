@@ -30,6 +30,7 @@ namespace AirSicknessBags.Controllers
             var allbags = await _cache.GetFromTable(_context.Bags);
             var random = new Random();
             int index = random.Next(allbags.Count);
+            ViewBag.Count = allbags.Count;
 
             return View(allbags[index]);
         }

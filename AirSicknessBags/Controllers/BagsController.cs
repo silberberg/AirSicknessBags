@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
 using AirSicknessBags.Models;
+using AirSicknessBags.ViewModels;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -28,17 +31,20 @@ namespace AirSicknessBags.Controllers
         private readonly ILogger<BagsController> _logger;
         private IGenericCacheService _cache;
         private readonly BagContext _context;
+        private readonly IWebHostEnvironment _webHostEnvironment;
         [BindProperty]
         public BagViewModel bvm { get; set; }
         public Bagsmvc Bags { get; set; }
         public Bagtypes TypesARooney { get; set; }
         public static IFormCollection SortedCriteria;
 
-        public BagsController(ILogger<BagsController> logger, IGenericCacheService cache, BagContext context)
+        public BagsController(ILogger<BagsController> logger, IGenericCacheService cache, BagContext context,
+            IWebHostEnvironment environment)
         {
             _logger = logger;
             _cache = cache;
             _context = context;
+            _webHostEnvironment = environment;
         }
 
         public async Task<List<Bagtypes>> GetBagtypes()
@@ -89,17 +95,30 @@ namespace AirSicknessBags.Controllers
 
                     int swapcount = collection["Swaps"].ToString() == "on" ? 1 : 0;
                     // Below, Convert.ToInt32 will return 0 when a.Year is null
-                    List<Bagsmvc> ResponseData = allbags.Where(x => x.Airline.Contains(SearchString, StringComparison.OrdinalIgnoreCase))
-                        .Where(y => y.Detail != null && y.Detail.Contains(DetailString, StringComparison.OrdinalIgnoreCase))
-                        .Where(z => z.BagType != null && z.BagType.Contains(BagTypeString, StringComparison.OrdinalIgnoreCase))
-                        .Where(b => b.TextColor != null && b.TextColor.Contains(ColorString, StringComparison.OrdinalIgnoreCase))
-                        .Where(c => c.BackgroundColor != null && c.BackgroundColor.Contains(BackgroundString, StringComparison.OrdinalIgnoreCase))
+                    allbags = allbags.Where(x => x.Airline.Contains(SearchString, StringComparison.OrdinalIgnoreCase)).ToList();
+                    allbags = LookFor(allbags, DetailString, x => x.Detail);
+                    allbags = LookFor(allbags, BagTypeString, x => x.BagType);
+                    allbags = LookFor(allbags, ColorString, x => x.TextColor);
+                    allbags = LookFor(allbags, BackgroundString, x => x.BackgroundColor);
+                    List<Bagsmvc> ResponseData = allbags
                         .Where(w => w.NumberOfSwaps >= swapcount)
                         .Where(a => chosenYear == 0 ? true :
                             Compare == "After" ? ReturnInt(a.Year) > chosenYear :
                                 (Compare == "Before" ? ReturnInt(a.Year) < chosenYear && ReturnInt(a.Year) != 0 :
                                     ReturnInt(a.Year) == chosenYear))
                         .ToList();
+
+                    //List<Bagsmvc> ResponseData = allbags.Where(x => x.Airline.Contains(SearchString, StringComparison.OrdinalIgnoreCase))
+                    //    .Where(y => y.Detail != null && y.Detail.Contains(DetailString, StringComparison.OrdinalIgnoreCase))
+                    //    .Where(z => z.BagType != null && z.BagType.Contains(BagTypeString, StringComparison.OrdinalIgnoreCase))
+                        //.Where(b => b.TextColor != null && b.TextColor.Contains(ColorString, StringComparison.OrdinalIgnoreCase))
+                        //.Where(c => c.BackgroundColor != null && c.BackgroundColor.Contains(BackgroundString, StringComparison.OrdinalIgnoreCase))
+                        //.Where(w => w.NumberOfSwaps >= swapcount)
+                        //.Where(a => chosenYear == 0 ? true :
+                        //    Compare == "After" ? ReturnInt(a.Year) > chosenYear :
+                        //        (Compare == "Before" ? ReturnInt(a.Year) < chosenYear && ReturnInt(a.Year) != 0 :
+                        //            ReturnInt(a.Year) == chosenYear))
+                        //.ToList();
 
                     if (swapcount > 0)
                     {
@@ -119,6 +138,19 @@ namespace AirSicknessBags.Controllers
                 Response = null as OkObjectResult;
             }
             return Response;
+        }
+
+        private List<Bagsmvc> LookFor(List<Bagsmvc> baglist, String searchFor, Func<Bagsmvc, IComparable> getProperty)
+        {
+            if (searchFor != "")
+            {
+                return baglist
+                    .Where(x => getProperty(x) != null && getProperty(x).ToString()
+                    .Contains(searchFor, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+            }
+
+            return baglist;
         }
 
         private int ReturnInt(string year)
@@ -260,21 +292,26 @@ namespace AirSicknessBags.Controllers
             ViewBag.NumPages = NumPages;
             ViewBag.PerPage = PerPage;
 
-            return View(baglist);
+            BagsIndexViewModel bivm = new BagsIndexViewModel();
+            bivm.Bags = baglist;
+            return View(bivm);
         }
 
         // Post: Bags
         [HttpPost]
 #pragma warning disable CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
-        public async Task<IActionResult> Index(int? whichpage, int? perpage, int? numpages, IFormCollection collection)
+        public async Task<IActionResult> Index(int? whichpage, int? perpage, int? numpages)
+//        public async Task<IActionResult> Index(int? whichpage, int? perpage, int? numpages, IFormCollection collection)
 #pragma warning restore CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
         {
+            string airline = Request.Form["Airline"].ToString();
+            ViewBag.AirlineName = airline;
+
             int WhichPage = whichpage ?? 1;
             int PerPage = perpage ?? 5;
             int NumPages = numpages ?? 0;
             string SortOrder = "airline";
 
-            string airline = Request.Form["Airline"].ToString();
             string swaps = Request.Form["Swaps"];
             // THIS WILL WORK TOO!
             //string airline2 = collection["Airline"].ToString();
@@ -284,7 +321,8 @@ namespace AirSicknessBags.Controllers
 
             var okResult = bags as OkObjectResult;
             var baglist = okResult.Value as List<Bagsmvc>;
-            if (collection["Swaps"].ToString() == "on")
+            if (Request.Form["Swaps"].ToString() == "on")
+//                if (collection["Swaps"].ToString() == "on")
             {
                 ViewBag.Swaps = 1;
                 baglist = baglist.OrderByDescending(s => s.DateSwapAdded).ThenBy(x => x.Airline).ToList();
@@ -305,7 +343,10 @@ namespace AirSicknessBags.Controllers
 
             ViewBag.NameSortParm = "airline_desc";
             ViewBag.YearSortParm = "year";
-            return View(baglist);
+
+            BagsIndexViewModel bivm = new BagsIndexViewModel();
+            bivm.Bags = baglist;
+            return View(bivm);
         }
 
         // GET: Bags/Details/5
@@ -349,7 +390,6 @@ namespace AirSicknessBags.Controllers
 
 
         // GET: Bags/Edit/5
-        [Authorize]
         [HttpGet]
         [Authorize]
         public async Task<IActionResult> Edit(int? id, bool? copy)
@@ -372,7 +412,7 @@ namespace AirSicknessBags.Controllers
             // CREATE a new blank bag
             {
                 ViewBag.Operation = "Newly Created";
-                _context.Bags.Add(bag);
+                await _context.Bags.AddAsync(bag);
                 await _context.SaveChangesAsync(); ;
                 await _cache.GetFromTable(true, _context.Bags);
             }
@@ -386,6 +426,7 @@ namespace AirSicknessBags.Controllers
                 ViewBag.Operation = "Recently Copied";
                 bag.Id = 0;
                 bag.Links = null;
+                bag.Person = null; // This is required because the instance of Person is being 'tracked' elsewhere
                 await _context.Bags.AddAsync(bag);
                 await _context.SaveChangesAsync(); 
 //                await _cache.AddItem(bag, _context.Bags);
@@ -398,25 +439,109 @@ namespace AirSicknessBags.Controllers
             return View(bvm);
         }
 
+        //public async void ProcessBag(Bagsmvc bag) {
+        //    Boolean RefreshLinks = false;
+
+        //    try
+        //    {
+        //        Linksmvccore Link = new Linksmvccore();
+        //        // Not only do we update the bag, automatically create a link
+        //        // Only do this if a Person was selected AND if link doesn't already exist
+        //        if (bag.PersonID != 0 && bag.PersonID != null)
+        //        {
+        //            List<Linksmvccore> alllinks = await _cache.GetFromTable(_context.Links);
+        //            Link = alllinks.FirstOrDefault(x => x.BagId == bag.Id && x.PersonId == (int)bag.PersonID);
+        //            // No, the current link doesn't already exist, so save a new one
+        //            if (Link == null)
+        //            {
+        //                Link.PersonId = (int)bag.PersonID;
+        //                Link.BagId = bag.Id;
+        //                await _context.Links.AddAsync(Link);
+        //                RefreshLinks = true;
+        //            }
+        //        }
+
+        //        // But mainly, we're here to update the bag
+        //        _context.Bags.Update(bvm.Bag);
+        //        await _context.SaveChangesAsync();
+
+        //        // Refresh the cache
+        //        await _cache.GetFromTable(true, _context.Bags);
+        //        await _cache.GetFromTable(RefreshLinks, _context.Links);
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        RedirectToAction("Error", "Bags", new { message = e.Message } ;
+        //    }
+
+        //}
+
         // POST: Bags/Edit/5
         [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Edit(BagViewModel bvm, IFormCollection collection)
+        public async Task<ActionResult> Edit(BagViewModel bvm, IFormCollection collection, List<IFormFile> files)
         {
             if (ModelState.IsValid)
             {
+                Boolean RefreshLinks = false;
+
                 try
                 {
+                    Linksmvccore Link = new Linksmvccore();
+                    // Not only do we update the bag, automatically create a link
+                    // Only do this if a Person was selected AND if link doesn't already exist
+                    if (bvm.Bag.PersonID != 0 && bvm.Bag.PersonID != null)
+                    {
+                        List<Linksmvccore> alllinks = await _cache.GetFromTable(_context.Links);
+                        Linksmvccore link = alllinks.FirstOrDefault(x => x.BagId == bvm.Bag.Id && x.PersonId == (int)bvm.Bag.PersonID);
+                        // No, the current link doesn't already exist, so save a new one
+                        if (link == null)
+                        {
+                            Link.PersonId = (int)bvm.Bag.PersonID;
+                            Link.BagId = bvm.Bag.Id;
+                            await _context.Links.AddAsync(Link);
+                            RefreshLinks = true;
+                        }
+                    }
+
+                    foreach(var file in files)
+                    {
+                        if (file != null || file.Length != 0)
+                        {
+
+                            String path = Path.Combine(
+                                        Directory.GetCurrentDirectory(), "wwwroot\\images",
+                                        file.FileName);
+
+                            // This works with HostGator on mvc.fitpacking.com!!
+                            //path = "wwwroot\\images\\" + file.FileName;
+
+//                            return Content(path);
+                            using (var stream = new FileStream(path, FileMode.Create))
+                            {
+                                await file.CopyToAsync(stream);
+                            }
+
+                        }
+                    }
+
+                    //TempData["debug"] = bvm.Bag.CopyFile(bvm.Bag.FrontFileName);
+                    ////bvm.Bag.CopyFile(bvm.Bag.BackFileName);
+                    ////bvm.Bag.CopyFile(bvm.Bag.BottomFileName);
+
+                    // But mainly, we're here to update the bag
                     _context.Bags.Update(bvm.Bag);
                     await _context.SaveChangesAsync();
                     
-                    // Refresh the cache
+                    // Refresh the cache.  To update Navigation properties, an update of People is required as well
                     await _cache.GetFromTable(true, _context.Bags);
+                    await _cache.GetFromTable(RefreshLinks, _context.Links);
+                    await _cache.GetFromTable(RefreshLinks, _context.People);
 
                     return RedirectToAction(nameof(Index));
                 }
-                catch
+                catch (Exception e)
                 {
                     return View();
                 }
@@ -425,7 +550,8 @@ namespace AirSicknessBags.Controllers
             return View(bvm.Bag);
         }
 
-        // GET: Bags/Delete/5
+        // GET: Bags/Delete/5  
+        // Doesn't do anything since it's a Bad idea to expose this, as anyone could just delete bags randomly using the right URL
         [Authorize]
         [HttpGet]
         public ActionResult Delete(int id)
@@ -433,7 +559,7 @@ namespace AirSicknessBags.Controllers
             return View();
         }
 
-        // POST: Bags/Delete/5
+        // POST: Bags/Delete/5  Better not have to use this very often
         [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -441,18 +567,25 @@ namespace AirSicknessBags.Controllers
         {
             try
             {
-                // Can this be done using the Links Navigation Property?
+                // Q. Can this be done using the Links Navigation Property?
+                // A. It turned out that it HAS to be done through the Links Navigation Property.  The Navigation Property
+                // seems to put some kind of lock on the table so you either have to release the Navigation Property (and 
+                // who knows how to do that???) or just delete from the Navigation Property (which is what's done below)
+
                 // Don't just delete the bag, delete all the links to it as well
-                // The Foreign Key should work, but doesn't reliably do so.  Who can tell why?
                 var allbags = await _cache.GetFromTable(_context.Bags);
-                var alllinks = await _cache.GetFromTable(_context.Links);
+                //var alllinks = await _cache.GetFromTable(_context.Links);
                 var bag = allbags.FirstOrDefault(x => x.Id == id);
-                var links = alllinks.Where(x => x.BagId == id).ToList();
+                //var links = alllinks.Where(x => x.BagId == id).ToList();
 
                 // Remove all the links
-                links.ForEach(x => _context.Links.Remove(x));
+                // Can't use bag.Links.ForEach(x => _context.Links.Remove(x)); because it's an ICollection, not a List<linksmvc>
+                foreach (Linksmvccore l in bag.Links)
+                {
+                    _context.Links.Remove(l);
+                }
 
-                // Remove the bag
+                // Finally remove the bag
                 _context.Bags.Remove(bag);
                 await _context.SaveChangesAsync();
 

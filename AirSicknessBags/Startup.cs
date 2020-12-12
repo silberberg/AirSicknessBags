@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using AirSicknessBags.Models;
@@ -10,6 +11,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 
 namespace AirSicknessBags
@@ -26,7 +28,7 @@ namespace AirSicknessBags
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            string constr = Configuration.GetConnectionString("DefaultConnection");
+            string constr = Configuration.GetConnectionString("ConnectionStringHostGator");
             services.AddDbContext<BagContext>(option => option.UseMySql(constr));
             services.AddIdentity<IdentityUser, IdentityRole>()
                 .AddEntityFrameworkStores<BagContext>();
@@ -35,6 +37,11 @@ namespace AirSicknessBags
                option.Password.RequiredLength = 10;
            });
             services.AddControllersWithViews().AddRazorRuntimeCompilation();
+
+            // Allows us to upload files to server
+            services.AddSingleton<IFileProvider>(
+                new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images")));
+
             //services.AddRazorPages().AddRazorRuntimeCompilation();
             //services.AddRazorPages();
             services.AddMemoryCache();
@@ -51,9 +58,10 @@ namespace AirSicknessBags
             }
             else
             {
-                app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-                app.UseHsts();
+                app.UseDeveloperExceptionPage();
+                //app.UseExceptionHandler("/Home/Error");
+                //// The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+                //app.UseHsts();
             }
             app.UseHttpsRedirection();
             app.UseStaticFiles();

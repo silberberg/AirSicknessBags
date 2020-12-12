@@ -4,15 +4,56 @@
     ViewData["Title"] = "Air Sickness Bag Museum";
 }
 
-    <div class="text-center bg-warning p-2">
-        <h1 class="display-4">Welcome to the Air Sickness Bag Virtual Museum</h1>
-        <h4>Serving your barf bag needs since 1997</h4>
-        <div class="container bg-primary col-md-4 p-4">
-            <h4>Random Bag of The Day</h4>
-            @Model.Airline- @Model.Id<br />
-            @Html.Raw(@BagContext.DisplayImage(Model.FrontFileName, 150)) 
-            @Html.Raw(@BagContext.DisplayImage(Model.BackFileName, 150)) 
-            @Html.Raw(@BagContext.DisplayImage(Model.BottomFileName, 150))<br />
-        </div>
+    <div class="container border">
+        <div class="text-center bg-warning p-2">
+            <h1 class="display-4">Welcome to the Air Sickness Bag Virtual Museum</h1>
+            <h4>Serving your barf bag needs since 1997</h4>
+            <table class="table bg-primary">
+                <thead>
+                    <tr class="row">
+                        <th class="col-md-3">
+                            <a href="https://fitpacking.com/cubecart/swag-/-merchandise.html" target="_blank">
+                                <h4>Worst Gift Ever - Only $10</h4>
+                            </a>
+                        </th>
+                        <th class="col-md-6">
+                            <h4>Random Bag of The Day</h4>
+                        </th>
+                        <th class="col-md-3">
+                            <h4>What is this?</h4>
+                        </th>
+                    </tr>
+                    </thead>
 
+                <tbody>
+                    <tr class="row">
+                        <td class="col-md-3">
+                            <a href="https://fitpacking.com/cubecart/swag-/-merchandise.html" target="_blank">
+                                <img class="img-responsive" src="~/images/PosterHiRes.jpg" width="250" class="m-2"/>
+                            </a>
+                            @*<h5>Running @System.Environment.Version of .Net core</h5>*@
+                        </td>
+                        <td class="col-md-6">
+                            @Model.Airline- @Model.Id<br />
+                            @Html.Raw(@BagContext.DisplayImage(Model.FrontFileName, 150))
+                            @Html.Raw(@BagContext.DisplayImage(Model.BackFileName, 150))
+                            @Html.Raw(@BagContext.DisplayImage(Model.BottomFileName, 150))<br />
+                        </td>
+                        <td class="col-md-3" align="left">
+                            <h5>I collect barf bags.  My collection currently contains @ViewBag.Count bags.
+                            Most are from airlines.  But they are also from boats, trains, movies (mostly horror),
+                            video games, political campaigns and even a few banks.</h5>
+                            <h5>While this website and hobby is an enormous waste of time, I like to think that it's
+                            a higher quality waste of time than many other places on the web.</h5>
+                        </td>
+                    </tr>
+                </tbody>
+                </table>
+
+                        @*<div class="bg-primary col-md-4 p-4">
+                        </div>
+                        <div class="bg-primary col-md-4 p-4">
+                        </div>*@
+
+        </div>
     </div>

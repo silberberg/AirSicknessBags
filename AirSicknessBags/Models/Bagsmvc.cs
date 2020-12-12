@@ -3,6 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.IO;
+using System.Linq;
+using System.Net;
 
 namespace AirSicknessBags.Models
 {
@@ -56,5 +59,71 @@ namespace AirSicknessBags.Models
         public Peoplemvc Person { get; set; } // This is the person bag was obtained from 
 
         public ICollection<Linksmvccore> Links { get; set; }
+
+        public String CopyFile(String filename) 
+        {
+            if (filename != null)
+            {
+                //string sourcePath = "C:/airsick/100 dpi with no matching 300 dpi scans/" +
+                //    filename.Substring(0, 1) + "/";
+                string sourcePath = @"C:\airsick\100 dpi with no matching 300 dpi scans\" +
+                    filename.Substring(0, 1) + @"\";
+                string targetPath = @"wwwroot\images\";
+                // targetPath = @"C:\doc\";
+
+
+
+                //// Get the object used to communicate with the server.
+                FtpWebRequest request = (FtpWebRequest)WebRequest
+                    .Create("ftp://192.185.11.66/mvc.fitpacking.com/wwwroot/images/" + filename + ".jpg");
+                request.Method = WebRequestMethods.Ftp.UploadFile;
+                request.UsePassive = false;
+                request.UseBinary = true;
+
+                //// FTP login
+                string pass = Environment.GetEnvironmentVariable("FTP_ACCESS");
+                request.Credentials = new NetworkCredential("fitpacking", pass);
+
+                // Copy the contents of the file to the request stream.  TEXT FILES ONLY
+                //StreamReader sourceStream = new StreamReader(sourcePath + filename + ".jpg");
+                //byte[] fileContents = System.Text.Encoding.UTF8.GetBytes(sourceStream.ReadToEnd());
+                //                request.ContentLength = sourceStream.ReadToEnd().Length;
+                //                sourceStream.Close();
+
+                // Copy the contents of the file.  IMAGE FILES ONLY
+                String tempFilename = sourcePath + filename + ".jpg";
+                return (tempFilename);
+                //byte[] fileContents = File.ReadAllBytes(tempFilename);
+                //request.ContentLength = fileContents.Length;
+
+                //Stream requestStream = request.GetRequestStream();
+                //requestStream.Write(fileContents, 0, fileContents.Length);
+                //requestStream.Close();
+
+                //FtpWebResponse response = (FtpWebResponse)request.GetResponse();
+
+                //response.Close();
+
+
+
+
+
+                // Use Path class to manipulate file and directory paths.
+                //string sourceFile = Path.Combine(sourcePath, filename) + ".jpg";
+                //string destFile = Path.Combine(targetPath, filename) + ".jpg";
+
+                //if (!File.Exists(destFile) &&
+                //    File.Exists(sourceFile))
+                //{
+                //    File.Copy(sourceFile, destFile);
+                //}
+
+
+            }
+
+            return ("No image found");
+
+        }
     }
+
 }

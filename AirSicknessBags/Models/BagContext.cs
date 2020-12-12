@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Extensions.Configuration;
+using Xceed.Wpf.Toolkit;
 
 namespace AirSicknessBags.Models
 {
@@ -34,6 +37,8 @@ namespace AirSicknessBags.Models
             public Bagsmvc Bag { get; set; }
             public List<Peoplemvc> People { get; set; }
             public List<Bagtypes> TypeOfBag { get; set; }
+            //public List<IFormFile> Files { get; set; }
+            //public IFormFile File { get; set; }
         }
 
         public class PeopleViewModel
@@ -86,9 +91,17 @@ namespace AirSicknessBags.Models
         {
             if (bagname != null)
             {
-                string img = "http://www.airsicknessbags.com/components/com_airsicknessbag/images/" + bagname + ".jpg";
+                string img = "";
+                string env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+                if (env == "Production")
+                {
+                    img = "http://www.airsicknessbags.com/components/com_airsicknessbag/images/" + bagname + ".jpg";
+                } else
+                {
+                    img = "/images/" + bagname + ".jpg";
+                }
                 string result = "<a href=" + img + " target=\"_blank\" title=\"Click on image to supersize\"> ";
-                result += "<span><img class=\"border border-primary border-width:8px\" src=" + img + " style=\"width: " + width + "px\" />";
+                result += "<span><img class=\"border border-primary border-width:8px\" src=" + img + " style=\"max-width: " + width + "px\" />";
                 result += "</a></span>";
                 return (result);
             }
@@ -111,7 +124,7 @@ namespace AirSicknessBags.Models
                 return (null);
             }
         }
-        
+
         //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         //{
         //    if (!optionsBuilder.IsConfigured)
@@ -127,6 +140,13 @@ namespace AirSicknessBags.Models
 
             modelBuilder.Entity<Bagsmvc>(entity =>
             {
+                entity.HasIndex(e => e.Id)
+                    .HasName("id_UNIQUE")
+                    .IsUnique();
+
+                //entity.HasIndex(e => e.ObtainedFromPerson)
+                //    .HasName("FK_ObtainedFrom_idx");
+
                 entity.Property(e => e.Airline)
                     .HasCharSet("utf8")
                     .HasCollation("utf8_general_ci");

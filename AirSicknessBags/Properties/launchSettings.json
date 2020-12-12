@@ -2,6 +2,10 @@
   "iisSettings": {
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
+    "iis": {
+      "applicationUrl": "http://localhost/AirSicknessBags",
+      "sslPort": 0
+    },
     "iisExpress": {
       "applicationUrl": "http://localhost:54516",
       "sslPort": 44381
@@ -12,8 +16,8 @@
       "commandName": "IISExpress",
       "launchBrowser": true,
       "environmentVariables": {
-        "Key": "Value",
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "FTP_ACCESS": "Pitfacking#1"
       }
     },
     "AirSicknessBags": {
@@ -31,6 +35,15 @@
         "ASPNETCORE_ENVIRONMENT": "Production"
       },
       "applicationUrl": "https://airsicknessbags.azurewebsites.net/"
+    },
+    "BarfBags": {
+      "commandName": "IISExpress",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Production",
+        "FTP_ACCESS": "Pitfacking#1"
+      },
+      "applicationUrl": "https://www.barfbags.com/"
     }
   }
 }

@@ -71,10 +71,9 @@ namespace AirSicknessBags.Migrations
                     b.Property<int?>("NumberOfSwaps")
                         .HasColumnType("int(11)");
 
-                    b.Property<string>("ObtainedFrom")
-                        .HasColumnType("varchar(255)")
-                        .HasAnnotation("MySql:CharSet", "utf8")
-                        .HasAnnotation("MySql:Collation", "utf8_general_ci");
+                    b.Property<int?>("PersonID")
+                        .HasColumnName("PersonID")
+                        .HasColumnType("int(11)");
 
                     b.Property<string>("TextColor")
                         .HasColumnType("varchar(255)")
@@ -87,6 +86,12 @@ namespace AirSicknessBags.Migrations
                         .HasAnnotation("MySql:Collation", "utf8_general_ci");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Id")
+                        .IsUnique()
+                        .HasName("id_UNIQUE");
+
+                    b.HasIndex("PersonID");
 
                     b.ToTable("bagsmvc");
                 });
@@ -142,65 +147,17 @@ namespace AirSicknessBags.Migrations
                     b.ToTable("country");
                 });
 
-            modelBuilder.Entity("AirSicknessBags.Models.Duh", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<string>("FullName")
-                        .IsRequired()
-                        .HasColumnType("longtext CHARACTER SET utf8mb4");
-
-                    b.Property<int>("Version")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Duh");
-                });
-
             modelBuilder.Entity("AirSicknessBags.Models.Linksmvccore", b =>
                 {
                     b.Property<int>("LinkNumber")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int(11)");
 
-                    b.Property<string>("BackFileName")
-                        .HasColumnType("varchar(50)")
-                        .HasAnnotation("MySql:CharSet", "utf8")
-                        .HasAnnotation("MySql:Collation", "utf8_general_ci");
-
-                    b.Property<int?>("BagId")
+                    b.Property<int>("BagId")
                         .HasColumnName("BagID")
                         .HasColumnType("int(11)");
 
-                    b.Property<string>("BottomFileName")
-                        .HasColumnType("varchar(50)")
-                        .HasAnnotation("MySql:CharSet", "utf8")
-                        .HasAnnotation("MySql:Collation", "utf8_general_ci");
-
-                    b.Property<string>("FirstName")
-                        .HasColumnType("varchar(255)")
-                        .HasAnnotation("MySql:CharSet", "utf8")
-                        .HasAnnotation("MySql:Collation", "utf8_general_ci");
-
-                    b.Property<string>("FrontFileName")
-                        .HasColumnType("varchar(255)")
-                        .HasAnnotation("MySql:CharSet", "utf8")
-                        .HasAnnotation("MySql:Collation", "utf8_general_ci");
-
-                    b.Property<string>("LastName")
-                        .HasColumnType("varchar(255)")
-                        .HasAnnotation("MySql:CharSet", "utf8")
-                        .HasAnnotation("MySql:Collation", "utf8_general_ci");
-
-                    //b.Property<string>("MiddleName")
-                    //    .HasColumnType("varchar(45)")
-                    //    .HasAnnotation("MySql:CharSet", "utf8")
-                    //    .HasAnnotation("MySql:Collation", "utf8_general_ci");
-
-                    b.Property<int?>("PersonId")
+                    b.Property<int>("PersonId")
                         .HasColumnName("PersonID")
                         .HasColumnType("int(11)");
 
@@ -224,21 +181,16 @@ namespace AirSicknessBags.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int(11)");
 
-                    b.Property<int?>("Collector")
-                        .HasColumnType("int(11)");
+                    b.Property<sbyte?>("Collector")
+                        .HasColumnType("tinyint(4)");
 
                     b.Property<string>("Comments")
                         .HasColumnType("longtext")
                         .HasAnnotation("MySql:CharSet", "utf8")
                         .HasAnnotation("MySql:Collation", "utf8_general_ci");
 
-                    b.Property<string>("Country")
-                        .HasColumnType("varchar(255)")
-                        .HasAnnotation("MySql:CharSet", "utf8")
-                        .HasAnnotation("MySql:Collation", "utf8_general_ci");
-
-                    b.Property<int?>("Donor")
-                        .HasColumnType("int(11)");
+                    b.Property<sbyte?>("Donor")
+                        .HasColumnType("tinyint(4)");
 
                     b.Property<string>("FirstName")
                         .HasColumnType("varchar(255)")
@@ -288,14 +240,14 @@ namespace AirSicknessBags.Migrations
                         .HasAnnotation("MySql:CharSet", "utf8")
                         .HasAnnotation("MySql:Collation", "utf8_general_ci");
 
-                    b.Property<int?>("Seller")
-                        .HasColumnType("int(11)");
+                    b.Property<sbyte?>("Seller")
+                        .HasColumnType("tinyint(4)");
 
-                    b.Property<int?>("StarterKit")
-                        .HasColumnType("int(11)");
+                    b.Property<sbyte?>("StarterKit")
+                        .HasColumnType("tinyint(4)");
 
-                    b.Property<int?>("Swapper")
-                        .HasColumnType("int(11)");
+                    b.Property<sbyte?>("Swapper")
+                        .HasColumnType("tinyint(4)");
 
                     b.Property<string>("TertiaryEmail")
                         .HasColumnType("varchar(255)")
@@ -504,15 +456,26 @@ namespace AirSicknessBags.Migrations
                     b.ToTable("AspNetUserTokens");
                 });
 
+            modelBuilder.Entity("AirSicknessBags.Models.Bagsmvc", b =>
+                {
+                    b.HasOne("AirSicknessBags.Models.Peoplemvc", "Person")
+                        .WithMany("Bags")
+                        .HasForeignKey("PersonID");
+                });
+
             modelBuilder.Entity("AirSicknessBags.Models.Linksmvccore", b =>
                 {
                     b.HasOne("AirSicknessBags.Models.Bagsmvc", "Bag")
                         .WithMany("Links")
-                        .HasForeignKey("BagId");
+                        .HasForeignKey("BagId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("AirSicknessBags.Models.Peoplemvc", "Person")
                         .WithMany("Links")
-                        .HasForeignKey("PersonId");
+                        .HasForeignKey("PersonId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

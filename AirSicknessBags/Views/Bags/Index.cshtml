@@ -1,6 +1,7 @@
 ﻿@inject Microsoft.AspNetCore.Identity.SignInManager<IdentityUser> signInManager;
 @inject BagContext _context;
-@model List<AirSicknessBags.Models.Bagsmvc>
+@*@model List<AirSicknessBags.Models.Bagsmvc>*@
+@model AirSicknessBags.ViewModels.BagsIndexViewModel 
 @{
     ViewData["Title"] = "Bags";
 }
@@ -10,6 +11,7 @@
 @*@using (Html.BeginForm("Index", "Bags", FormMethod.Post))*@
 
 
+@*<form id="BagForm" asp-controller="Bags" asp-action="Index" enctype="multipart/form-data" method="post">*@
 <form id="BagForm" asp-controller="Bags" asp-action="Index" method="post">
     <div class="container border border-primary p-2 m-1 bg-light">
         <div class="form-group row">
@@ -19,6 +21,9 @@
                     <input type="text" id="Airline" name="Airline" class="form-control-sm" value="Part or all of bag name"
                            onclick="ClearOutFields(['Airline']);" />
                 </h5>
+                @*<h5>Running @System.Environment.Version of .Net core</h5>
+                <h5>Airline search = @ViewBag.AirlineName</h5>
+                <h5>Debug = @TempData["debug"]</h5>*@
             </div>
             <div class="col-4">
                 <h5>
@@ -178,8 +183,10 @@
                 </div>
             </div>
 
-            @foreach (var x in Model)
+            @if (Model.Bags != null)
             {
+                foreach (var x in Model.Bags)
+                {
                 <div class="container border border-dark p-2 m-1 bg-primary">
                     <div class="form-group row">
                         <div class="col-lg-6">
@@ -207,11 +214,14 @@
                         <div class="col-8">
                             <h5>
                                 @(x.Year != null ? "Approximate Year: " + x.Year + ", " : "")
-                                <strong>
-                                    @(x.Person.FirstName != null || x.Person.LastName != null ? 
-                                        "Originally Obtained From: " + x.Person.FirstName + 
-                                        ' ' + x.Person.MiddleName + ' ' + x.Person.LastName + ", " : "")
-                                </strong>
+                                @if (x.Person != null)
+                                {
+                                    <strong>
+                                        @(x.Person.FirstName != null || x.Person.LastName != null ?
+                            "Originally Obtained From: " + x.Person.FirstName +
+                            ' ' + x.Person.MiddleName + ' ' + x.Person.LastName + ", " : "")
+                                    </strong>
+                                }
                                 @Html.Raw(x.Detail)
                             </h5>
                         </div>
@@ -227,6 +237,7 @@
                         </div>
                     </div>
                 </div>
+                }
             }
 
             <h5>

@@ -2,9 +2,20 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <Authors>Steve Silberberg</Authors>
+    <Company>Fitpacking.com</Company>
+    <Copyright>1997-2000</Copyright>
+    <Platforms>AnyCPU;x64</Platforms>
+    <Configurations>Debug;Release;duh</Configurations>
+    <UserSecretsId>6e72c6eb-df09-487e-a107-7b6dc5f02997</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="wwwroot\images\doit.bat" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Extended.Wpf.Toolkit" Version="3.8.1" />
     <PackageReference Include="Microsoft.AspNetCore" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="3.1.4" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="3.1.4" />

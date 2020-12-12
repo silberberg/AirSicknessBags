@@ -9,84 +9,88 @@
 
 <h2>@ViewBag.Operation Bag</h2>
 <div class="border container">
-    <form asp-controller="Bags" asp-action="Edit" method="post">
-        @*@using (Html.BeginForm("Edit", "Bags", FormMethod.Post))*@
+    <form asp-controller="Bags" asp-action="Edit" enctype="multipart/form-data" method="post">
+        @*<form asp-controller="Bags" asp-action="Edit" method="post" enctype="multipart/form-data">*@
+            @*@using (Html.BeginForm("Edit", "Bags", FormMethod.Post))*@
 
-        <h1>ID: @Model.Bag.Id</h1>
-        <div>
-            @*@if (ViewBag.Operation != "Recently Copied")
-        {
-            <input type="hidden" asp-for="@Model.Bag.Id" />
-        }*@
-            <input type="hidden" asp-for="@Model.Bag.Id" />
-            <span asp-validation-for="@Model.Bag.Airline" class="text-danger"></span>
-            <label asp-for="@Model.Bag.Airline"></label>
-            <input asp-for="@Model.Bag.Airline" />
-            <label asp-for="@Model.Bag.FrontFileName"></label>
-            <input type="file" onchange="retrieveImageName('Bag_FrontFileName', this.value)" />
-            <input asp-for="@Model.Bag.FrontFileName" />
-            <label asp-for="@Model.Bag.BackFileName"></label>
-            <input type="file" onchange="retrieveImageName('Bag_BackFileName', this.value)" />
-            <input asp-for="@Model.Bag.BackFileName" />
-            <label asp-for="@Model.Bag.BottomFileName"></label>
-            <input type="file" onchange="retrieveImageName('Bag_BottomFileName', this.value)" />
-            <input asp-for="@Model.Bag.BottomFileName" />
-            <label asp-for="@Model.Bag.Year"></label>
-            <input asp-for="@Model.Bag.Year" />
-            <label asp-for="@Model.Bag.TextColor"></label>
-            <input asp-for="@Model.Bag.TextColor" />
-            <label asp-for="@Model.Bag.BackgroundColor"></label>
-            <input asp-for="@Model.Bag.BackgroundColor" />
-            <label asp-for="@Model.Bag.BagType"></label>
-            @foreach (Bagtypes b in Model.TypeOfBag)
-            {
-                <label value="@b.Bagtype">@b.Bagtype</label>
-                if (Model.Bag.BagType != null && Model.Bag.BagType.Contains(b.Letter))
+            <h1>ID: @Model.Bag.Id</h1>
+            <div>
+                @*@if (ViewBag.Operation != "Recently Copied")
                 {
-                    <input type="checkbox" id="@(b.Letter)_Checkbox" checked onclick="toggleBagType('@b.Letter')" />
-                    BagTypeString += b.Letter;
-                }
-                else
+                    <input type="hidden" asp-for="@Model.Bag.Id" />
+                }*@
+                <input type="hidden" asp-for="@Model.Bag.Id" />
+                <span asp-validation-for="@Model.Bag.Airline" class="text-danger"></span>
+                <label asp-for="@Model.Bag.Airline"></label>
+                <input asp-for="@Model.Bag.Airline" />
+                <label asp-for="@Model.Bag.FrontFileName"></label>
+                <input type="file" name="Files" onchange="retrieveImageName('Bag_FrontFileName', this.value)" />
+                <input asp-for="@Model.Bag.FrontFileName" />
+                <label asp-for="@Model.Bag.BackFileName"></label>
+                <input type="file" name="Files" onchange="retrieveImageName('Bag_BackFileName', this.value)" />
+                <input asp-for="@Model.Bag.BackFileName" />
+                <label asp-for="@Model.Bag.BottomFileName"></label>
+                <input type="file" name="Files" onchange="retrieveImageName('Bag_BottomFileName', this.value)" />
+                <input asp-for="@Model.Bag.BottomFileName" />
+                <label asp-for="@Model.Bag.Year"></label>
+                <input asp-for="@Model.Bag.Year" />
+                <label asp-for="@Model.Bag.TextColor"></label>
+                <input asp-for="@Model.Bag.TextColor" />
+                <label asp-for="@Model.Bag.BackgroundColor"></label>
+                <input asp-for="@Model.Bag.BackgroundColor" />
+                <label asp-for="@Model.Bag.BagType"></label>
+                @foreach (Bagtypes b in Model.TypeOfBag)
                 {
-                    <input type="checkbox" id="@(b.Letter)_Checkbox" onclick="toggleBagType('@b.Letter')" />
-                }
-            }
-
-            <input asp-for="@Model.Bag.BagType" />
-            <label asp-for="@Model.Bag.PersonID"></label>
-            <input asp-for="@Model.Bag.PersonID" />
-
-            <select id="Dude" name="Dude">
-                @foreach (var person in Model.People)
-                {
-                    @if (person.PersonNumber == Model.Bag.PersonID)
+                    <label value="@b.Bagtype">@b.Bagtype</label>
+                    if (Model.Bag.BagType != null && Model.Bag.BagType.Contains(b.Letter))
                     {
-                        <option value="@person.PersonNumber" selected>@person.FirstName @person.MiddleName @person.LastName</option>
+                        <input type="checkbox" id="@(b.Letter)_Checkbox" checked onclick="toggleBagType('@b.Letter')" />
+                        BagTypeString += b.Letter;
                     }
                     else
                     {
-                        <option value="@person.PersonNumber">@person.FirstName @person.MiddleName @person.LastName</option>
+                        <input type="checkbox" id="@(b.Letter)_Checkbox" onclick="toggleBagType('@b.Letter')" />
                     }
                 }
-            </select>
 
-            <label asp-for="@Model.Bag.NumberOfSwaps"></label>
-            <input asp-for="@Model.Bag.NumberOfSwaps" />
-            <label asp-for="@Model.Bag.DateSwapAdded"></label>
-            <input asp-for="@Model.Bag.DateSwapAdded" asp-format="{0:yyyy-MM-dd}" />
-            @*WORKS <input asp-for="@Model.Bag.DateSwapAdded" asp-format="{0:yyyy-MM-dd}" type="date" />*@
-            <label asp-for="@Model.Bag.Lost"></label>
-            <input asp-for="@Model.Bag.Lost" />
-            <label asp-for="@Model.Bag.Detail"></label>
-            <textarea rows="5" cols="80" asp-for="@Model.Bag.Detail"></textarea>
-            <br>
-            <input class="btn btn-info" type="submit" />
-            <a class="btn btn-info" asp-controller="Bags" asp-action="Index">Cancel</a>
+                <input asp-for="@Model.Bag.BagType" />
+                <input type="hidden" asp-for="@Model.Bag.Person" />
 
-            @await Html.PartialAsync("~/Views/Shared/_AreYouSurePartial.cshtml", Model.Bag, ViewData["Controller"] as ViewDataDictionary)
+                <label asp-for="@Model.Bag.PersonID"></label>
+                @*<input asp-for="@Model.Bag.PersonID" />*@
 
-        </div>
-    </form>
+                <select asp-for="@Model.Bag.PersonID">
+                    <option value="@Model.Bag.PersonID" selected>Nobody</option>
+                    @foreach (var person in Model.People)
+                    {
+                        @if (person.PersonNumber == Model.Bag.PersonID)
+                        {
+                            <option value="@person.PersonNumber" selected>@person.FirstName @person.MiddleName @person.LastName</option>
+                        }
+                        else
+                        {
+                            <option value="@person.PersonNumber">@person.FirstName @person.MiddleName @person.LastName</option>
+                        }
+                    }
+                </select>
+
+                <label asp-for="@Model.Bag.NumberOfSwaps"></label>
+                <input asp-for="@Model.Bag.NumberOfSwaps" />
+                <label asp-for="@Model.Bag.DateSwapAdded"></label>
+                <input asp-for="@Model.Bag.DateSwapAdded" asp-format="{0:yyyy-MM-dd}" />
+                @*WORKS <input asp-for="@Model.Bag.DateSwapAdded" asp-format="{0:yyyy-MM-dd}" type="date" />*@
+                <label asp-for="@Model.Bag.Lost"></label>
+                <input asp-for="@Model.Bag.Lost" />
+                <label asp-for="@Model.Bag.Detail"></label>
+                <textarea rows="5" cols="80" asp-for="@Model.Bag.Detail"></textarea>
+                <br>
+                <input class="btn btn-info" type="submit" />
+                <a class="btn btn-info" asp-controller="Bags" asp-action="Index">Cancel</a>
+
+                @await Html.PartialAsync("~/Views/Shared/_AreYouSurePartial.cshtml", Model.Bag, ViewData["Controller"] as ViewDataDictionary)
+
+            </div>
+        </form>
 </div>
 
 @section scripts {
