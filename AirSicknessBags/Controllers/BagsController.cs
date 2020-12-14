@@ -292,7 +292,7 @@ namespace AirSicknessBags.Controllers
             ViewBag.NumPages = NumPages;
             ViewBag.PerPage = PerPage;
 
-            BagsIndexViewModel bivm = new BagsIndexViewModel();
+            BagsImageViewModel bivm = new BagsImageViewModel();
             bivm.Bags = baglist;
             return View(bivm);
         }
@@ -344,7 +344,7 @@ namespace AirSicknessBags.Controllers
             ViewBag.NameSortParm = "airline_desc";
             ViewBag.YearSortParm = "year";
 
-            BagsIndexViewModel bivm = new BagsIndexViewModel();
+            BagsImageViewModel bivm = new BagsImageViewModel();
             bivm.Bags = baglist;
             return View(bivm);
         }

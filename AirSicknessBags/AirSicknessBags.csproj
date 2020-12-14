@@ -11,6 +11,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Models\ApplicationDbContext.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Include="wwwroot\images\doit.bat" />
   </ItemGroup>
 

@@ -10,6 +10,7 @@ using static AirSicknessBags.Models.BagContext;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Authorization;
 using System.ComponentModel.DataAnnotations;
+using AirSicknessBags.ViewModels;
 
 namespace AirSicknessBags.Controllers
 {

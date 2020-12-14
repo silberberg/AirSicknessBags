@@ -29,7 +29,8 @@ namespace AirSicknessBags
         public void ConfigureServices(IServiceCollection services)
         {
             string constr = Configuration.GetConnectionString("ConnectionStringHostGator");
-            services.AddDbContext<BagContext>(option => option.UseMySql(constr));
+            // I could do this without Pool, that is AddDbContext but it spins up a new connection every time without Pool
+            services.AddDbContextPool<BagContext>(option => option.UseMySql(constr));
             services.AddIdentity<IdentityUser, IdentityRole>()
                 .AddEntityFrameworkStores<BagContext>();
             services.Configure<IdentityOptions>(option =>

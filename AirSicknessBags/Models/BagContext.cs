@@ -25,6 +25,7 @@ namespace AirSicknessBags.Models
         //    configuration = config;
         //}
 
+        // These statements allow the code to communicate with the database 
         public virtual DbSet<Bagsmvc> Bags { get; set; }
         public virtual DbSet<Linksmvccore> Links { get; set; }
         public virtual DbSet<Peoplemvc> People { get; set; }
@@ -32,66 +33,11 @@ namespace AirSicknessBags.Models
         public virtual DbSet<Country> Countries { get; set; }
 //        public virtual DbSet<Duh> Duh { get; set; }
 
-        public class BagViewModel
-        {
-            public Bagsmvc Bag { get; set; }
-            public List<Peoplemvc> People { get; set; }
-            public List<Bagtypes> TypeOfBag { get; set; }
-            //public List<IFormFile> Files { get; set; }
-            //public IFormFile File { get; set; }
-        }
-
-        public class PeopleViewModel
-        {
-            public List<Peoplemvc> People{ get; set; }
-            public List<Country> Countries { get; set; }
-        }
-
-        public class PersonViewModel
-        {
-            public Peoplemvc Person { get; set; }
-            public List<Country> Countries { get; set; }
-        }
-
-        public class LinkViewModel
-        {
-            public Bagsmvc Bag { get; set; }
-            public List<Peoplemvc> People { get; set; }
-            public Linksmvccore Link { get; set; }
-            public List<SelectListItem> Options { get; set; }
-        }
-
-        public class AllLinkViewModel
-        {
-            public Bagsmvc Bag { get; set; }
-            public Peoplemvc Person { get; set; }
-            public Linksmvccore Link { get; set; }
-            public List<Peoplemvc> People { get; set; }
-            public List<Bagsmvc> Bags{ get; set; }
-            public List<Linksmvccore> Links { get; set; }
-
-            public AllLinkViewModel()
-            {
-                Bag = new Bagsmvc();
-                Person = new Peoplemvc();
-                Link = new Linksmvccore();
-                People = new List<Peoplemvc>();
-                Bags = new List<Bagsmvc>();
-                Links = new List<Linksmvccore>();
-            }
-        }
-
-        public class Patron
-        {
-            public Peoplemvc Person { get; set; }
-            public List<Bagsmvc> Bags { get; set; }
-        }
-
         public static string DisplayImage(string bagname, int width = 100)
         {
             if (bagname != null)
             {
-                string img = "";
+                string img;
                 string env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
                 if (env == "Production")
                 {

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace AirSicknessBags.ViewModels
 {
-    public class BagsIndexViewModel
+    public class BagsImageViewModel
     {
         public List<AirSicknessBags.Models.Bagsmvc> Bags { get; set; }
         public IFormFile MyImage { set; get; }
