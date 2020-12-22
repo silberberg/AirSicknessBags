@@ -188,7 +188,7 @@ namespace AirSicknessBags.Controllers
 
             int WhichPage = whichpage ?? 1;
             int NumPages = numpages ?? 0;
-            int PerPage = perpage ?? 5;
+            int PerPage = perpage ?? 25;
 
             if (collection.Count == 0 || id != null)
             {
@@ -308,7 +308,7 @@ namespace AirSicknessBags.Controllers
             ViewBag.AirlineName = airline;
 
             int WhichPage = whichpage ?? 1;
-            int PerPage = perpage ?? 5;
+            int PerPage = perpage ?? 25;
             int NumPages = numpages ?? 0;
             string SortOrder = "airline";
 
@@ -334,7 +334,7 @@ namespace AirSicknessBags.Controllers
             }
 
             // Now we have to fetch only the page of interest.
-            baglist = CreatePagination(baglist, WhichPage, PerPage, ref NumPages);
+            // baglist = CreatePagination(baglist, WhichPage, PerPage, ref NumPages);
 
             ViewBag.SortOrder = SortOrder;
             ViewBag.WhichPage = WhichPage;

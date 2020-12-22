@@ -14,7 +14,7 @@ namespace AirSicknessBags.Models
     //    public List<Bagsmvc> baglist { get; set; }
     //}
 
-    [Table("bagsmvc")]
+    [Table("bags")]
     public partial class Bagsmvc
     {
         [Key]
@@ -36,6 +36,7 @@ namespace AirSicknessBags.Models
         [Column(TypeName = "varchar(255)")]
         public string BottomFileName { get; set; }
         [Column(TypeName = "varchar(255)")]
+        [Display(Name = "Bag Type")]
         public string BagType { get; set; }
         //[Column(TypeName = "varchar(255)")]
         //public string ObtainedFrom { get; set; }

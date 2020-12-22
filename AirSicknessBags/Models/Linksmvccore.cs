@@ -7,7 +7,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace AirSicknessBags.Models
 {
     [Bind("BagId,PersonId,LinkNumber")]
-    [Table("linksmvccore")]
+    [Table("links")]
     public partial class Linksmvccore
     {
         [Key]

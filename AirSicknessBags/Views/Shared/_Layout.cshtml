@@ -8,7 +8,9 @@
     <meta name="google-signin-client_id" content="987226980191-u8dk5eggme7u71d9q060al3l6t579ouo.apps.googleusercontent.com">
     <title>Air Sickness Bag Museum - @ViewData["Title"]</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
     <link rel="stylesheet" href="~/css/site.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.22/css/jquery.dataTables.min.css" />   
 </head>
 <body>
     <header>
@@ -44,24 +46,24 @@
                             </li>
                         }
                         @*/* Never show Register or Login pages
-        else
-        {
-            <li class="nav-item">
-                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Register">Register</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Login">Login</a>
-            </li>
-        }*@
+                            else
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Register">Register</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Login">Login</a>
+                                </li>
+                            }*@
 
                         @*Privacy is in the footer, boot it from the header
-        <li class="nav-item">
-            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </li>*@
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                            </li>*@
                     </ul>
                 </div>
                 @*Google Sign-in is superfluous, but left here if ever necessary
-                <div class="g-signin2" data-onsuccess="onSignIn"></div>*@
+                    <div class="g-signin2" data-onsuccess="onSignIn"></div>*@
             </div>
         </nav>
     </header>
@@ -73,12 +75,18 @@
 
     <footer class="border-top footer text-muted">
         <div class="container">
-            &copy; 2020 - Air Sickness Bag Museum - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            &copy; 2020 - Air Sickness Bag Museum -
+            <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a> -
+            <a asp-area="" asp-controller="Home" asp-action="Contact">
+                Contact
+                <span class="glyphicon glyphicon-envelope"></span>
+            </a>
         </div>
     </footer>
     <script src="https://apis.google.com/js/platform.js" async defer></script>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js"></script>
     <script src="~/js/Login.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @RenderSection("Scripts", required: false)

@@ -39,21 +39,24 @@
                 <label asp-for="@Model.Bag.BackgroundColor"></label>
                 <input asp-for="@Model.Bag.BackgroundColor" />
                 <label asp-for="@Model.Bag.BagType"></label>
-                @foreach (Bagtypes b in Model.TypeOfBag)
-                {
-                    <label value="@b.Bagtype">@b.Bagtype</label>
-                    if (Model.Bag.BagType != null && Model.Bag.BagType.Contains(b.Letter))
+                
+                <div class="form-check">
+                    @foreach (Bagtypes b in Model.TypeOfBag)
                     {
-                        <input type="checkbox" id="@(b.Letter)_Checkbox" checked onclick="toggleBagType('@b.Letter')" />
-                        BagTypeString += b.Letter;
+                        <label class="form-check-label col-md-2" value="@b.Bagtype">@b.Bagtype</label>
+                        if (Model.Bag.BagType != null && Model.Bag.BagType.Contains(b.Letter))
+                        {
+                            <input type="checkbox" id="@(b.Letter)_Checkbox" class="form-check-input" checked onclick="toggleBagType('@b.Letter')" />
+                            BagTypeString += b.Letter;
+                        }
+                        else
+                        {
+                            <input type="checkbox" id="@(b.Letter)_Checkbox" class="form-check-input" onclick="toggleBagType('@b.Letter')" />
+                        }
                     }
-                    else
-                    {
-                        <input type="checkbox" id="@(b.Letter)_Checkbox" onclick="toggleBagType('@b.Letter')" />
-                    }
-                }
+                    <input class="form-control-plaintext col-md-2 bg-light" asp-for="@Model.Bag.BagType" />
+                </div>
 
-                <input asp-for="@Model.Bag.BagType" />
                 <input type="hidden" asp-for="@Model.Bag.Person" />
 
                 <label asp-for="@Model.Bag.PersonID"></label>

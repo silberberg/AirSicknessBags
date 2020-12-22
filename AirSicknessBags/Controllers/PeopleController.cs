@@ -197,7 +197,7 @@ namespace AirSicknessBags.Controllers
 
             pvm.Countries = await GetAllPertinentCountries();
             pvm.People = await GetPeople();
-            pvm.People = CreatePagination(pvm.People, WhichPage, PerPage, ref NumPages);
+//            pvm.People = CreatePagination(pvm.People, WhichPage, PerPage, ref NumPages);
             ViewBag.WhichPage = WhichPage;
             ViewBag.NumPages = NumPages;
             ViewBag.PerPage = PerPage;
@@ -230,7 +230,7 @@ namespace AirSicknessBags.Controllers
             List<Peoplemvc> peoplemvc = await GetPeople();
 
             // Now we have to fetch only the page of interest.
-            peoplemvc = CreatePagination(peoplemvc, WhichPage, PerPage, ref NumPages);
+//            peoplemvc = CreatePagination(peoplemvc, WhichPage, PerPage, ref NumPages);
             ViewBag.WhichPage = WhichPage;
             ViewBag.NumPages = NumPages;
             ViewBag.PerPage = PerPage;
