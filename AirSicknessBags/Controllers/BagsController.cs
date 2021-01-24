@@ -285,7 +285,7 @@ namespace AirSicknessBags.Controllers
             }
 
             // Now we have to fetch only the page of interest.
-            baglist = CreatePagination(baglist, WhichPage, PerPage, ref NumPages);
+//            baglist = CreatePagination(baglist, WhichPage, PerPage, ref NumPages);
 
             ViewBag.SortOrder = SortOrder;
             ViewBag.WhichPage = WhichPage;
@@ -294,6 +294,7 @@ namespace AirSicknessBags.Controllers
 
             BagsImageViewModel bivm = new BagsImageViewModel();
             bivm.Bags = baglist;
+            bivm.Bagtypes = await GetBagtypes();
             return View(bivm);
         }
 
@@ -346,6 +347,7 @@ namespace AirSicknessBags.Controllers
 
             BagsImageViewModel bivm = new BagsImageViewModel();
             bivm.Bags = baglist;
+            bivm.Bagtypes = await GetBagtypes();
             return View(bivm);
         }
 

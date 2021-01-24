@@ -16,34 +16,36 @@
             <h1>ID: @Model.Bag.Id</h1>
             <div>
                 @*@if (ViewBag.Operation != "Recently Copied")
-                {
-                    <input type="hidden" asp-for="@Model.Bag.Id" />
-                }*@
+        {
+            <input type="hidden" asp-for="@Model.Bag.Id" />
+        }*@
                 <input type="hidden" asp-for="@Model.Bag.Id" />
                 <span asp-validation-for="@Model.Bag.Airline" class="text-danger"></span>
                 <label asp-for="@Model.Bag.Airline"></label>
-                <input asp-for="@Model.Bag.Airline" />
+                <input asp-for="@Model.Bag.Airline" /><br />
                 <label asp-for="@Model.Bag.FrontFileName"></label>
                 <input type="file" name="Files" onchange="retrieveImageName('Bag_FrontFileName', this.value)" />
-                <input asp-for="@Model.Bag.FrontFileName" />
+                <input asp-for="@Model.Bag.FrontFileName" /><br />
                 <label asp-for="@Model.Bag.BackFileName"></label>
                 <input type="file" name="Files" onchange="retrieveImageName('Bag_BackFileName', this.value)" />
-                <input asp-for="@Model.Bag.BackFileName" />
+                <input asp-for="@Model.Bag.BackFileName" /><br />
                 <label asp-for="@Model.Bag.BottomFileName"></label>
                 <input type="file" name="Files" onchange="retrieveImageName('Bag_BottomFileName', this.value)" />
-                <input asp-for="@Model.Bag.BottomFileName" />
+                <input asp-for="@Model.Bag.BottomFileName" /><br />
                 <label asp-for="@Model.Bag.Year"></label>
                 <input asp-for="@Model.Bag.Year" />
                 <label asp-for="@Model.Bag.TextColor"></label>
                 <input asp-for="@Model.Bag.TextColor" />
                 <label asp-for="@Model.Bag.BackgroundColor"></label>
                 <input asp-for="@Model.Bag.BackgroundColor" />
+                <br />
                 <label asp-for="@Model.Bag.BagType"></label>
-                
+                <input class="col-md-1 bg-light" disabled asp-for="@Model.Bag.BagType" />
+
                 <div class="form-check">
                     @foreach (Bagtypes b in Model.TypeOfBag)
                     {
-                        <label class="form-check-label col-md-2" value="@b.Bagtype">@b.Bagtype</label>
+                        <label class="form-check-label col-md-2" asp-for="@b.Bagtype">@b.Bagtype</label>
                         if (Model.Bag.BagType != null && Model.Bag.BagType.Contains(b.Letter))
                         {
                             <input type="checkbox" id="@(b.Letter)_Checkbox" class="form-check-input" checked onclick="toggleBagType('@b.Letter')" />
@@ -54,7 +56,6 @@
                             <input type="checkbox" id="@(b.Letter)_Checkbox" class="form-check-input" onclick="toggleBagType('@b.Letter')" />
                         }
                     }
-                    <input class="form-control-plaintext col-md-2 bg-light" asp-for="@Model.Bag.BagType" />
                 </div>
 
                 <input type="hidden" asp-for="@Model.Bag.Person" />

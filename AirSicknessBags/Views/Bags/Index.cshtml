@@ -13,13 +13,15 @@
 
 @*<form id="BagForm" asp-controller="Bags" asp-action="Index" enctype="multipart/form-data" method="post">*@
 <form id="BagForm" asp-controller="Bags" asp-action="Index" method="post">
-    <div class="container border border-primary p-2 m-1 bg-light">
+    <div class="container-fluid border border-primary p-2 m-2 bg-light">
         <div class="form-group row">
             <div class="col-lg-3 col-md-4 col-sm-5 col-xl-3">
                 <h5>
                     Find Airline
-                    <input type="text" id="Airline" name="Airline" class="form-control-sm" value="Part or all of bag name"
-                           onclick="ClearOutFields(['Airline']);" />
+                    @*<input type="text" id="Airline" name="Airline" class="form-control-sm" value="Part or all of bag name"
+                        onclick="ClearOutFields(['Airline']);" />*@
+                    <input type="text" id="Airline" name="Airline" class="form-control-sm"
+                           placeholder="Part or all of bag name" />
                 </h5>
                 @*<h5>Running @System.Environment.Version of .Net core</h5>
                     <h5>Airline search = @ViewBag.AirlineName</h5>
@@ -28,33 +30,30 @@
             <div class="col-lg-3 col-md-4 col-sm-5 col-xl-3">
                 <h5>
                     Details Contain
-                    <input type="text" id="Detail" name="Detail" class="form-control-sm" value="Part or all of bag details"
-                           onclick="ClearOutFields(['Detail']);" />
+                    @*<input type="text" id="Detail" name="Detail" class="form-control-sm" value="Part or all of bag details"
+                        onclick="ClearOutFields(['Detail']);" />*@
+                    <input type="text" id="Detail" name="Detail" class="form-control-sm"
+                           placeholder="Part or all of bag details" />
                 </h5>
             </div>
-            <div class="col-1">
-                <label asp-for="@Model.Bags[0].BagType"></label>
-                <select id="BagType" name="BagType"  class="form-control-sm">
-                    <option value="">Any</option>
-                    <option value="A">Air Sickness</option>
-                    <option value="S">Sea Sickness</option>
-                    <option value="C">Car Sickness</option>
-                    <option value="B">Bus Sickness</option>
-                    <option value="T">Train Sickness</option>
-                    <option value="P">Space Sickness</option>
-                    <option value="D">Video Games</option>
-                    <option value="L">Political</option>
-                    <option value="M">Movie</option>
-                    <option value="E">Medical</option>
-                    <option value="U">Musical</option>
-                    <option value="O">Odd/Unique</option>
-                    <option value="G">Generic</option>
-                    <option value="N">Unknown</option>
-                    <option value="V">Favorites</option>
-                    <option value="H">Helicopter</option>
-                    <option value="X">Bachelor(ette)</option>
-                    <option value="R">Computer</option>
-                </select>
+            <div class="col-lg-2 col-md-3 col-sm-4 col-xl-2">
+                <h5>
+                    <label asp-for="@Model.Bags[0].BagType"></label>
+                    <select id="BagType" name="BagType" class="dropdown form-control-sm">
+                        <option value="" class="dropdown-header">Any</option>
+                        @foreach (var bt in @Model.Bagtypes)
+                        {
+                            <option value="@bt.Letter">@bt.Bagtype</option>
+                        }
+                    </select>
+                </h5>
+            </div>
+            <div class="col-lg-2 col-md-3 col-sm-4 col-xl-2">
+                <h5 class="form-check">
+                    <input type="checkbox" id="Swaps" class="form-check-input"
+                           name="Swaps" @(ViewBag.Swaps == 1 ? "checked" : "")>
+                    <label for="Swaps" class="form-check-label">Swaps Only?</label>
+                </h5>
             </div>
 
         </div>
@@ -64,13 +63,12 @@
             <div class="col-1">
                 <label for="Equal">Equal</label>
                 <input type="radio" id="Equal" name="DateCompare" value="Equal">
-            </div>
-            <div class="col-1">
+                @*</div>
+                    <div class="col-1">*@
                 <label for="Before">Before</label>
                 <input type="radio" id="Before" name="DateCompare" value="Before">
-            </div>
-
-            <div class="col-1">
+                @*</div>
+                    <div class="col-1">*@
                 <label for="After">After</label>
                 <input type="radio" id="After" name="DateCompare" value="After">
             </div>
@@ -82,34 +80,33 @@
                     <option value="@i">@i</option>
                 }
             </select>
-            <div class="col-4">
-                <h6>
+
+            <div class="col-lg-3 col-md-4 col-sm-5 col-xl-3">
+                <h5>
                     Text Color
-                    <input type="text" id="TextColor" name="TextColor" class="form-control-sm" />
-                </h6>
+                    <input type="text" id="TextColor" name="TextColor" class="form-control-sm"
+                           placeholder="Any color" />
+                </h5>
             </div>
-            <div class="col-4">
-                <h6>
+            <div class="col-lg-3 col-md-4 col-sm-5 col-xl-3">
+                <h5>
                     Background Color
-                    <input type="text" id="BackgroundColor" name="BackgroundColor" class="form-control-sm" />
-                </h6>
+                    <input type="text" id="BackgroundColor" name="BackgroundColor" class="form-control-sm"
+                           placeholder="Any color" />
+                </h5>
             </div>
 
+            <div class="col-3">
+                <h5 class="form-check">
+                    <input type="checkbox" id="SeeEveryBag" name="SeeEveryBag" class="form-check-input" />
+                    <label for="SeeEveryBag" class="form-check-label">See Every Bag (may load slowly)</label>
+                </h5>
+            </div>
         </div>
 
         <div class="form-group row">
-            <div class="col-2">
-                <label for="Swaps">Swaps Only?</label>
-                <input type="checkbox" id="Swaps" name="Swaps" @(ViewBag.Swaps == 1 ? "checked" : "")>
-            </div>
-            <div class="col-3">
-                <label for="SeeEveryBag">See Every Bag (may load slowly)</label>
-                <input type="checkbox" id="SeeEveryBag" name="SeeEveryBag">
-            </div>
-            <div class="col-2">
+            <div class="offset-9 col-3">
                 <input class="btn btn-info" type="submit" value="Find Bag" onclick="ClearOutFields(['Airline', 'Detail']);" />
-            </div>
-            <div class="col-2">
                 @* Only let logged in user create a bag *@
                 @if (signInManager.IsSignedIn(User))
                 {
@@ -125,10 +122,10 @@
 @*Display the bag(s) returned*@
 @if (Model != null)
 {
-    <div class="container border border-dark p-2 m-1 bg-warning">
-        <div class="form-group row">
-            @if (ViewBag.Swaps == 1)
-            {
+    @if (ViewBag.Swaps == 1)
+    {
+        <div class="container border border-dark p-2 m-1 bg-warning">
+            <div class="form-group row">
                 <div class="col-2">
                     <h2>Swaps</h2>
                 </div>
@@ -138,111 +135,128 @@
                 <div class="col-2">
                     <h6>To clear swaps uncheck above</h6>
                 </div>
-            }
+            </div>
         </div>
-    </div>
+    }
 
     @if (Model.Bags != null)
     {
 
-<div class="container-fluid">
-<table id="BagsTable" class="display compact dt-head-right wrap" width="100%">
-    <thead>
-        <tr>
-            <th>
-                Bag
-            </th>
-            <th>
-                Image
-            </th>
-            <th>
-                Swap?<br />
-                Date added
-            </th>
-            <th>
-                Pithy Description
-            </th>
-        </tr>
+        <div class="container-fluid">
+            <table id="BagsTable" class="display compact dt-head-right wrap border border-primary" width="100%">
+                <thead>
+                    <tr>
+                        <th>
+                            Bag
+                        </th>
+                        <th>
+                            @*Note: this column is hidden by jQuery below*@
+                            Year
+                        </th>
+                        <th>
+                            Image
+                        </th>
+                        <th>
+                            Swap?<br />
+                            Date added
+                        </th>
+                        <th>
+                            Pithy Description
+                        </th>
+                    </tr>
 
-        <tbody>
-            @foreach (var x in Model.Bags)
-            {
-                <tr>
-                    <td>
-                        <h4>
-                            @x.Airline
-                            @if (signInManager.IsSignedIn(User))
-                            {
-                                <span>- @x.Id</span>
-                            }
+                <tbody>
+                    @foreach (var x in Model.Bags)
+                    {
+                        <tr>
+                            <td>
+                                <h4>
+                                    @x.Airline
+                                    @if (signInManager.IsSignedIn(User))
+                                    {
+                                        <span>- @x.Id</span>
+                                    }
 
-                            <br />
-                            @* Only let logged in user edit, copy or link bags *@
-                            @if (signInManager.IsSignedIn(User))
-                            {
-                                <a class="btn btn-info" asp-controller="Bags" asp-action="Edit" asp-route-id="@x.Id">Edit Bag</a>
-                                <a class="btn btn-info" asp-controller="Bags" asp-action="Index">Cancel</a>
-                                <a class="btn btn-info" asp-controller="Bags" asp-action="Edit" asp-route-id="@x.Id" asp-route-copy="true">Copy Bag</a>
-                                <a class="btn btn-info" asp-controller="Links" asp-action="Create" asp-route-id="@x.Id" asp-route-copy="true">Link Bag</a>
-                            }
-                        </h4>
-                    </td>
-                    <td>
-                        <div>
-                            @Html.Raw(@BagContext.DisplayImage(x.FrontFileName))
-                                @Html.Raw(@BagContext.DisplayImage(x.BackFileName))
-                                @Html.Raw(@BagContext.DisplayImage(x.BottomFileName))<br />
-                        </div>
-                    </td>
-                    <td>
-                        @if (x.NumberOfSwaps > 0)
-                        {
-                            <p class="alert-heading">
-                                @if (x.DateSwapAdded.HasValue)
+                                    <br />
+                                    @* Only let logged in user edit, copy or link bags *@
+                                    @if (signInManager.IsSignedIn(User))
+                                    {
+                                        <a class="btn btn-info" asp-controller="Bags" asp-action="Edit" asp-route-id="@x.Id">Edit Bag</a>
+                                        <a class="btn btn-info" asp-controller="Bags" asp-action="Index">Cancel</a>
+                                        <a class="btn btn-info" asp-controller="Bags" asp-action="Edit" asp-route-id="@x.Id" asp-route-copy="true">Copy Bag</a>
+                                        <a class="btn btn-info" asp-controller="Links" asp-action="Create" asp-route-id="@x.Id" asp-route-copy="true">Link Bag</a>
+                                    }
+                                </h4>
+                            </td>
+                            <td>
+                                @*Note: this column is hidden by jQuery below
+                                    This is a stupid kludge to have datatables sort on Airline Name
+                                    and year *@
+                                @x.Airline @x.Year
+                            </td>
+                            <td>
+                                <div>
+                                    @*@{
+                                            String path = "/images/" + x.FrontFileName + ".jpg";
+                                            <a href="@path" target="_blank" title="Click on image to supersize">
+                                            <span>
+                                                 <img asp-append-version="true" class="border border-primary border-width:8px" src="@path" style="max-width:100px" />
+                                            </span></a>
+                                        }*@
+                                    @Html.Raw(@BagContext.DisplayImage(x.FrontFileName))
+                                    @Html.Raw(@BagContext.DisplayImage(x.BackFileName))
+                                    @Html.Raw(@BagContext.DisplayImage(x.BottomFileName))<br />
+                                </div>
+                            </td>
+                            <td>
+                                @if (x.NumberOfSwaps > 0)
                                 {
-                                    @x.DateSwapAdded.Value.ToString("yyyy-MM-dd")
+                                    <p class="alert-heading">
+                                        @if (x.DateSwapAdded.HasValue)
+                                        {
+                                            @x.DateSwapAdded.Value.ToString("yyyy-MM-dd")
+                                        }
+                                        <br />Swap available!
+                                    </p>
                                 }
-                                <br />Swap available!
-                            </p>
-                        }
-                    </td>
-                    <td>
-                        <h5>
-                            @(x.Year != null ? "Approximate Year: " + x.Year + ", " : "")
-                            @if (x.Person != null)
-                                {
-                                    <strong>
-                                        @(x.Person.FirstName != null || x.Person.LastName != null ?
+                            </td>
+                            <td>
+                                <h5>
+                                    @(x.Year != null ? "Approximate Year: " + x.Year + ", " : "")
+                                    @if (x.Person != null)
+                                    {
+                                        <strong>
+                                            @(x.Person.FirstName != null || x.Person.LastName != null ?
                                         "Originally Obtained From: " + x.Person.FirstName +
                                         ' ' + x.Person.MiddleName + ' ' + x.Person.LastName + ", " : "")
-                                    </strong>
-                                }
-                                @Html.Raw(x.Detail)
-                        </h5>
-                    </td>
-                </tr>
+                                        </strong>
+                                    }
+                                    @Html.Raw(x.Detail)
+                                </h5>
+                            </td>
+                        </tr>
 
-                /*
-                <tr>
-                    <td>
-                        <div class="col-4">
-                            @* Only let logged in user edit, copy or link bags *@
-                            @if (signInManager.IsSignedIn(User))
-                            {
-                                <a class="btn btn-info" asp-controller="Bags" asp-action="Edit" asp-route-id="@x.Id">Edit Bag</a>
-                                <a class="btn btn-info" asp-controller="Bags" asp-action="Index">Cancel</a>
-                                <a class="btn btn-info" asp-controller="Bags" asp-action="Edit" asp-route-id="@x.Id" asp-route-copy="true">Copy Bag</a>
-                                <a class="btn btn-info" asp-controller="Links" asp-action="Create" asp-route-id="@x.Id" asp-route-copy="true">Link Bag</a>
-                            }
-                        </div>
-                    </td>
-                </tr>
-                */
+                        /*
+                        <tr>
+                            <td>
+                                <div class="col-4">
+                                    @* Only let logged in user edit, copy or link bags *@
+                                    @if (signInManager.IsSignedIn(User))
+                                    {
+                                        <a class="btn btn-info" asp-controller="Bags" asp-action="Edit" asp-route-id="@x.Id">Edit Bag</a>
+                                        <a class="btn btn-info" asp-controller="Bags" asp-action="Index">Cancel</a>
+                                        <a class="btn btn-info" asp-controller="Bags" asp-action="Edit" asp-route-id="@x.Id" asp-route-copy="true">Copy Bag</a>
+                                        <a class="btn btn-info" asp-controller="Links" asp-action="Create" asp-route-id="@x.Id" asp-route-copy="true">Link Bag</a>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                        */
 
-            }
-        </tbody>
-</table>
-</div>
+                    }
+                </tbody>
+            </table>
+        </div>
 
         /*
         @foreach (var x in Model.Bags)
@@ -311,13 +325,43 @@
         $(document).ready(function () {
             //$('#BagsTable').DataTable(
             //);
-            $('#BagsTable').DataTable({
-                "order": [[2, "desc"]],
-                "columnDefs": [
-                    { "width": "40%", "targets": -1 }
-                ],
-                "responsive": true
-            });
+            if ($('#Swaps').is(':checked')) {
+                $('#BagsTable').DataTable({
+                    "order": [[3, "desc"]],
+                    "columnDefs": [
+                        { "width": "40%", "targets": -1 },
+                        {
+                            'targets': [1],
+                            'visible': false,
+                            'searchable': false
+                        },
+                    ],
+                    "responsive": true
+                });
+            }
+            else {
+                $('#BagsTable').DataTable({
+                    // Sort column 1 by column 2
+                    'columnDefs': [
+                        { 'orderData': [1], 'targets': [0] },
+                        {
+                            'targets': [1],
+                            'visible': false,
+                            'searchable': false
+                        },
+                        { "width": "40%", "targets": -1 }
+                    ],
+                    "responsive": true
+                });
+            };
+
+            //$('#BagsTable').DataTable({
+            //    "order": [[col, sort]],
+            //    "columnDefs": [
+            //        { "width": "40%", "targets": -1 }
+            //    ],
+            //    "responsive": true
+            //});
         });
     </script>
 }

@@ -30,10 +30,13 @@ namespace AirSicknessBags.Models
         [Column(TypeName = "varchar(255)")]
         public string Year { get; set; }
         [Column(TypeName = "varchar(255)")]
+        [Display(Name = "Front File Name")]
         public string FrontFileName { get; set; }
         [Column(TypeName = "varchar(255)")]
+        [Display(Name = "Back File Name")]
         public string BackFileName { get; set; }
         [Column(TypeName = "varchar(255)")]
+        [Display(Name = "Bottom File Name")]
         public string BottomFileName { get; set; }
         [Column(TypeName = "varchar(255)")]
         [Display(Name = "Bag Type")]

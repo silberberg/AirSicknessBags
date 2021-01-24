@@ -47,7 +47,7 @@ namespace AirSicknessBags.Models
                     img = "/images/" + bagname + ".jpg";
                 }
                 string result = "<a href=" + img + " target=\"_blank\" title=\"Click on image to supersize\"> ";
-                result += "<span><img class=\"border border-primary border-width:8px\" src=" + img + " style=\"max-width: " + width + "px\" />";
+                result += "<span><img asp-append-version=\"true\" class=\"border border-primary border-width:8px\" src=" + img + " style=\"max-width: " + width + "px\" />";
                 result += "</a></span>";
                 return (result);
             }
